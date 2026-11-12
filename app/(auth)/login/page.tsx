@@ -10,8 +10,8 @@ const errors: Record<string, string> = {
   suspended: "This account is suspended. Contact support if you think this is a mistake.",
 };
 
-export default async function LogInPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-  const { error } = await searchParams;
+export default async function LogInPage({ searchParams }: { searchParams: Promise<{ error?: string; next?: string }> }) {
+  const { error, next } = await searchParams;
 
   return (
     <Container className="max-w-md py-14 sm:py-20">
@@ -26,7 +26,7 @@ export default async function LogInPage({ searchParams }: { searchParams: Promis
         </div>
       ) : null}
       <div className="mt-10">
-        <LogInForm />
+        <LogInForm next={next} />
       </div>
     </Container>
   );

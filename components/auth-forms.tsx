@@ -95,11 +95,12 @@ export function SignUpForm({ defaultRole }: { defaultRole: string }) {
   );
 }
 
-export function LogInForm() {
+export function LogInForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState(logIn, {});
 
   return (
     <form action={action} className="space-y-6">
+      <input type="hidden" name="next" value={next ?? ""} />
       <div>
         <label htmlFor="email" className={labelClass}>Email</label>
         <input id="email" name="email" type="email" autoComplete="email" required className={inputClass} />

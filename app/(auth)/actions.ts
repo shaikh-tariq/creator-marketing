@@ -58,7 +58,8 @@ export async function logIn(_prev: FormState, formData: FormData): Promise<FormS
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return { error: "That email and password do not match. Have you verified your email?" };
 
-  redirect("/dashboard");
+  const next = String(formData.get("next") ?? "");
+  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard");
 }
 
 export async function signOut() {

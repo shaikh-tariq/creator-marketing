@@ -2,7 +2,7 @@
 
 A marketplace for digital products with a built-in influencer promotion network. India first.
 
-**Status: Milestone M0 (foundation).** Public pages, design system, sign-up with roles, empty role dashboards and the first database migration. Listings shown are samples. No payments yet.
+**Status: full pipeline in test mode.** Sellers list products and upload files, admins approve, influencers join and submit posts, sellers approve posts (which issues a tracked link and promo code), buyers check out, download and review, and every sale is split in the ledger. Checkout is a labelled **test payment**: orders and splits are real records, but no money moves until a payment gateway is connected.
 
 Read `docs/decisions.md` first. It records every decision and overrides the original handoff PDF.
 
@@ -10,14 +10,13 @@ Read `docs/decisions.md` first. It records every decision and overrides the orig
 
 | Area | State |
 |------|-------|
-| Home, two live hubs, two "coming soon" hubs, product pages | Working, with sample listings |
-| Sell and Promote pages, Terms / Privacy / Refunds drafts | Working |
-| Sign-up, email verification, login, logout, roles | Working once Supabase is connected |
-| Seller, influencer, buyer and admin dashboards | Empty shells with the three key numbers |
-| Money split function (`lib/money.ts`) | Working and checked |
-| Listings, checkout, downloads, ledger, influencer flow | Not built (M1 to M6) |
-
-Without Supabase keys the site runs in **preview mode**: every page is visible, sign-up is switched off.
+| Public site: home, hubs, search, product pages with reviews | Working, reads live products from the database |
+| Seller: products, file upload, submit for review, influencer requests, post approvals, orders and earnings, brand profile | Working |
+| Influencer: find products, join or apply, submit posts, link and promo code, clicks, earnings, channels | Working |
+| Buyer: checkout with promo code, receipt, library, downloads (60-second private links), reviews | Working (test payment) |
+| Admin: review queue, users, orders and refunds, ledger, settings | Working |
+| Real payments and payouts | Not built. Blocked on business registration and gateway approval (decisions, section C) |
+| Emails for each event, guest checkout, cover image uploads | Not built yet |
 
 ## Putting it online (about 20 minutes, no coding)
 
@@ -44,7 +43,7 @@ components/             design system and shared pieces (ui.tsx is the core)
 app/globals.css         colours and fonts
 lib/site.ts             name, hubs, platforms, launch settings
 lib/money.ts            the money split
-lib/sample-data.ts      sample listings (removed in M1)
+app/actions.ts          every button's server-side action
 supabase/migrations/    database setup
 docs/decisions.md       decisions log
 ```

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { supabaseConfigured } from "./supabase/config";
 import { createClient } from "./supabase/server";
@@ -19,7 +20,8 @@ export const roleHome: Record<Role, string> = {
   admin: "/admin",
 };
 
-export async function getProfile(): Promise<Profile | null> {
+// Who is logged in. Cached so the header and the page share one lookup per request.
+export const getProfile = cache(async (): Promise<Profile | null> => {
   if (!supabaseConfigured) return null;
   const supabase = await createClient();
   const {
@@ -32,15 +34,13 @@ export async function getProfile(): Promise<Profile | null> {
     .eq("id", user.id)
     .single();
   return (data as Profile | null) ?? null;
-}
+});
 
-// Guards a dashboard page. In preview mode (no Supabase yet) the page renders with empty numbers
-// so the design can be reviewed; once Supabase is connected it requires login and the right role.
-export async function requireRole(roles: Role[]): Promise<{ preview: boolean; profile: Profile | null }> {
-  if (!supabaseConfigured) return { preview: true, profile: null };
+// Guards a dashboard: must be logged in, not suspended, and have one of the allowed roles.
+export async function requireRole(roles: Role[]): Promise<Profile> {
   const profile = await getProfile();
   if (!profile) redirect("/login");
   if (profile.status === "suspended") redirect("/login?error=suspended");
   if (!roles.includes(profile.role)) redirect(roleHome[profile.role]);
-  return { preview: false, profile };
+  return profile;
 }

@@ -108,10 +108,12 @@ Implemented in `lib/money.ts`.
 
 | Milestone | Status |
 |-----------|--------|
-| M0 Foundation: app, design system, public pages, sign-up with roles, role dashboards, first migration | Built 12 Nov 2026 |
-| M1 Catalog: real listings, file upload, admin review queue | Next |
-| M2 Checkout | Blocked until section C is answered |
-| M3 to M7 | As in the handoff, with the changes above |
+| M0 Foundation | Built 12 Nov 2026 |
+| M1 Catalog, M3 Delivery, M4 Ledger, M5 Influencer loop, M6 Dashboards | Built 12 Nov 2026, running on a test-mode checkout |
+| M2 Real checkout (gateway, webhooks, payouts) | Blocked until section C is answered |
+| M7 Hardening: automated tests, emails, rate limits, monitoring | Not started |
+
+Simplifications in this build, to revisit: buyers need an account (guest checkout deferred); clicks are a counter per link, not a log; "released" earnings are worked out from the hold date instead of a scheduled job; cover art is one of four built-in styles.
 
 Honest timeline for evening work: 4 to 6 months to a private beta, not 8 to 12 weeks.
 

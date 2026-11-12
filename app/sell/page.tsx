@@ -10,7 +10,7 @@ const steps = [
   { t: "List a product", d: "Upload the file, add previews and a licence, and set the price." },
   { t: "Set the deal", d: "Choose the commission, an optional promo discount, and write a short content brief." },
   { t: "Approve posts", d: "Influencers submit their content. You approve, ask for changes or decline." },
-  { t: "Get paid by the gateway", d: "Each sale is split by the payment gateway. Your share settles to your own bank account." },
+  { t: "Get paid by the gateway", d: "Each sale is split automatically. Your share is paid out by the payment gateway after the hold period." },
 ];
 
 const faqs = [

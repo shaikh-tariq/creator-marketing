@@ -1,39 +1,69 @@
 import type { Metadata } from "next";
-import { DashboardShell, type DashboardConfig } from "@/components/dashboard-shell";
+import { ButtonLink, Card, StatCards } from "@/components/ui";
 import { requireRole } from "@/lib/auth";
+import { shortDate } from "@/lib/data";
+import { formatINR } from "@/lib/money";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Admin" };
 
-const config: DashboardConfig = {
-  roleLabel: "Admin",
-  heading: "Admin overview",
-  stats: [
-    { label: "Awaiting review", value: "0", hint: "New sellers and listings" },
-    { label: "Disputes", value: "0", hint: "Refund requests and chargebacks" },
-    { label: "Transfers on hold", value: "₹0", hint: "Released by the gateway after the hold" },
-  ],
-  nav: [
-    { label: "Overview" },
-    { label: "Review queue", milestone: "M1" },
-    { label: "Users", milestone: "M1" },
-    { label: "Orders", milestone: "M2" },
-    { label: "Ledger", milestone: "M4" },
-    { label: "Settings", milestone: "M6" },
-    { label: "Audit log", milestone: "M6" },
-  ],
-  empty: {
-    title: "Nothing to review",
-    text: "New sellers and listings will queue here for approval once Milestone M1 is built.",
-  },
-  checklist: [
-    "Register the business and get written answers from the payment gateway (docs/decisions.md, section C).",
-    "Have the seller and influencer agreements and the three policy pages reviewed by a lawyer.",
-    "Confirm TDS and GST handling with a CA.",
-    "Onboard the first ten sellers by hand.",
-  ],
+const actionLabels: Record<string, string> = {
+  product_approved: "Approved a product",
+  product_rejected: "Rejected a product",
+  user_status: "Changed an account's status",
+  order_refunded: "Refunded an order",
 };
 
-export default async function AdminDashboard() {
-  const { preview, profile } = await requireRole(["admin"]);
-  return <DashboardShell config={config} preview={preview} profile={profile} />;
+export default async function AdminOverview() {
+  await requireRole(["admin"]);
+  const supabase = await createClient();
+  const [sellers, products, orders, ledger, users, live, audit] = await Promise.all([
+    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "seller").eq("status", "pending"),
+    supabase.from("products").select("id", { count: "exact", head: true }).eq("status", "pending_review"),
+    supabase.from("orders").select("net_paise, status"),
+    supabase.from("ledger_entries").select("amount_paise").eq("account_type", "platform"),
+    supabase.from("profiles").select("id", { count: "exact", head: true }),
+    supabase.from("products").select("id", { count: "exact", head: true }).eq("status", "published"),
+    supabase.from("audit_log").select("id, action, created_at").order("created_at", { ascending: false }).limit(8),
+  ]);
+  const all = orders.data ?? [];
+  const paid = all.filter((o) => o.status === "paid");
+  const gmv = paid.reduce((s, o) => s + o.net_paise, 0);
+  const fees = (ledger.data ?? []).reduce((s, e) => s + e.amount_paise, 0);
+  const waiting = (sellers.count ?? 0) + (products.count ?? 0);
+
+  return (
+    <div className="space-y-6">
+      <StatCards
+        stats={[
+          { label: "Awaiting review", value: String(waiting), hint: `${sellers.count ?? 0} sellers · ${products.count ?? 0} listings` },
+          { label: "Sales through the platform", value: formatINR(gmv), hint: `${paid.length} paid · ${all.length - paid.length} refunded or other` },
+          { label: "Platform fees earned", value: formatINR(fees), hint: "After refunds (test mode)" },
+        ]}
+      />
+      <StatCards
+        stats={[
+          { label: "Accounts", value: String(users.count ?? 0) },
+          { label: "Live products", value: String(live.count ?? 0) },
+          { label: "Orders", value: String(all.length) },
+        ]}
+      />
+      {waiting > 0 ? <ButtonLink href="/admin/review">Open the review queue</ButtonLink> : null}
+      <Card>
+        <h2 className="text-xl">Recent admin activity</h2>
+        {(audit.data ?? []).length === 0 ? (
+          <p className="mt-3 text-sm text-ink-soft">Nothing yet. Approvals, refunds and suspensions are logged here.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-line text-sm">
+            {(audit.data ?? []).map((a) => (
+              <li key={a.id} className="flex justify-between py-2.5">
+                <span>{actionLabels[a.action] ?? a.action}</span>
+                <span className="text-xs text-ink-soft">{shortDate(a.created_at)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+    </div>
+  );
 }
