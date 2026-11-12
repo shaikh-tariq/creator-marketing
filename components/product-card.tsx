@@ -40,7 +40,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-line bg-card transition-shadow hover:shadow-md"
+      className="lift group flex flex-col overflow-hidden rounded-2xl border border-line bg-card"
     >
       <ProductArt art={product.art} format={product.format} className="aspect-[4/3]" />
       <div className="flex flex-1 flex-col p-5">

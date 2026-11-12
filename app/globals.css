@@ -55,3 +55,97 @@ h2 em {
 ::selection {
   background: var(--color-sky);
 }
+
+/* ---------- Motion ---------- */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.page-enter {
+  animation: page-enter 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes loading-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+.loading-bar {
+  animation: loading-bar 1.1s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--color-paper-deep) 25%, #f1f6ff 50%, var(--color-paper-deep) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+/* Items that rise into place one after another (set --d on each for the delay). */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+.rise {
+  animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--d, 0s);
+}
+
+/* The hero crowd: each character bobs gently and blinks. */
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+.bob {
+  animation: bob var(--bob, 4s) ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+@keyframes blink {
+  0%, 94%, 100% { transform: scaleY(1); }
+  97% { transform: scaleY(0.1); }
+}
+.blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blink 5s infinite;
+  animation-delay: var(--d, 0s);
+}
+@keyframes wave {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(7deg); }
+}
+.wave {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  animation: wave 2.2s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.float {
+  animation: float 5s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+
+/* Cards lift slightly on hover. */
+.lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px -12px rgb(47 98 216 / 0.25);
+}
+
+/* People who ask their device for less motion get none. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+}

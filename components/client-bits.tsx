@@ -1,12 +1,40 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 
-// A submit button that shows it is working, so nobody double-clicks.
+export function Spinner({ className = "" }: { className?: string }) {
+  return <span aria-hidden className={`inline-block size-3.5 animate-spin rounded-full border-2 border-current border-r-transparent ${className}`} />;
+}
+
+// Shows a spinner inside a link the moment it is clicked, until the next page is ready.
+export function LinkPending() {
+  const { pending } = useLinkStatus();
+  return pending ? <Spinner className="ml-1" /> : null;
+}
+
+// Header link: highlights the current page and shows a spinner while the next one loads.
+export function NavLink({ href, children, exact = false }: { href: string; children: React.ReactNode; exact?: boolean }) {
+  const pathname = usePathname();
+  const active = exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "page" : undefined}
+      className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 transition-colors active:scale-[0.97] ${
+        active ? "bg-paper-deep font-medium text-ink" : "text-ink-soft hover:bg-paper-deep/60 hover:text-ink"
+      }`}
+    >
+      {children}
+      <LinkPending />
+    </Link>
+  );
+}
+
+// A submit button that reacts instantly: it dims, shows a spinner and cannot be double-clicked.
 export function SubmitButton({
   children,
   className,
@@ -20,19 +48,22 @@ export function SubmitButton({
   value?: string;
   confirmText?: string;
 }) {
-  const { pending } = useFormStatus();
+  const { pending, data } = useFormStatus();
+  // When a form has several buttons, only the one that was pressed shows the spinner.
+  const mine = pending && (!name || data?.get(name) === value);
   return (
     <button
       type="submit"
       name={name}
       value={value}
-      disabled={pending}
-      className={className}
+      aria-disabled={pending}
+      className={`${className} ${pending ? "pointer-events-none opacity-70" : ""}`}
       onClick={(e) => {
-        if (confirmText && !window.confirm(confirmText)) e.preventDefault();
+        if (pending || (confirmText && !window.confirm(confirmText))) e.preventDefault();
       }}
     >
-      {pending ? "Working…" : children}
+      {mine ? <Spinner /> : null}
+      {children}
     </button>
   );
 }
@@ -49,11 +80,11 @@ export function DashNav({ items }: { items: { href: string; label: string; count
           <Link
             key={item.href}
             href={item.href}
-            className={`flex shrink-0 items-center justify-between gap-3 rounded-full px-4 py-2 text-sm transition-colors lg:rounded-lg ${
-              active ? "bg-ink text-paper" : "text-ink-soft hover:bg-paper-deep hover:text-ink"
+            className={`flex shrink-0 items-center justify-between gap-3 rounded-full px-4 py-2 text-sm transition-all active:scale-[0.97] lg:rounded-xl ${
+              active ? "bg-ink text-white shadow-sm" : "text-ink-soft hover:bg-paper-deep hover:text-ink"
             }`}
           >
-            {item.label}
+            <span className="flex items-center gap-1">{item.label}<LinkPending /></span>
             {item.count ? (
               <span className={`rounded-full px-2 text-xs ${active ? "bg-paper/20" : "bg-accent text-paper"}`}>{item.count}</span>
             ) : null}

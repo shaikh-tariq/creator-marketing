@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LinkPending } from "./client-bits";
 
 // Shared building blocks. Reuse these instead of restyling on each page.
 
@@ -13,12 +14,12 @@ const variants: Record<Variant, string> = {
 };
 
 export function buttonClass(variant: Variant = "primary", extra = "") {
-  return `inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full px-6 text-sm font-medium tracking-wide transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${extra}`;
+  return `inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full px-6 text-sm font-medium tracking-wide transition-all duration-150 hover:-translate-y-px active:translate-y-0 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${extra}`;
 }
 
 // Compact button for tables and lists.
 export function smallButton(variant: Variant = "outline", extra = "") {
-  return `inline-flex min-h-9 cursor-pointer items-center justify-center rounded-full px-4 text-xs font-medium transition-colors disabled:opacity-60 ${variants[variant]} ${extra}`;
+  return `inline-flex min-h-9 cursor-pointer items-center justify-center gap-1.5 rounded-full px-4 text-xs font-medium transition-all duration-150 active:scale-[0.96] disabled:opacity-60 ${variants[variant]} ${extra}`;
 }
 
 export function ButtonLink({
@@ -35,6 +36,7 @@ export function ButtonLink({
   return (
     <Link href={href} className={buttonClass(variant, className)}>
       {children}
+      <LinkPending />
     </Link>
   );
 }
@@ -172,20 +174,24 @@ export function Empty({ title, text, children }: { title: string; text: string; 
 
 export function Table({ head, rows }: { head: string[]; rows: React.ReactNode[][] }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-line bg-card">
-      <table className="w-full min-w-[36rem] text-left text-sm">
+    <div className="overflow-x-auto rounded-2xl border border-line bg-card shadow-sm">
+      <table className="w-full min-w-[40rem] border-collapse text-left text-sm">
         <thead>
-          <tr className="border-b border-line text-xs uppercase tracking-wider text-ink-soft">
-            {head.map((h) => (
-              <th key={h} className="px-4 py-3 font-medium">{h}</th>
+          <tr className="bg-paper-deep/70">
+            {head.map((h, i) => (
+              <th key={h + i} scope="col" className="whitespace-nowrap px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-ink">
+                {h}
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={i} className="border-b border-line last:border-0 align-top">
+            <tr key={i} className="border-t border-line align-middle transition-colors even:bg-paper/60 hover:bg-paper-deep/40">
               {row.map((cell, j) => (
-                <td key={j} className="px-4 py-3.5">{cell}</td>
+                <td key={j} className={`px-5 py-4 ${j === 0 ? "font-medium text-ink" : "text-ink/85"}`}>
+                  {cell}
+                </td>
               ))}
             </tr>
           ))}

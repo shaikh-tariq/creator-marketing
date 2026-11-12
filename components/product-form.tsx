@@ -63,8 +63,8 @@ export function ProductForm({ product, hubs }: { product?: Product; hubs: { id: 
           <Field label="Commission (%)" hint={`${launchSettings.commissionMinPct} to ${launchSettings.commissionMaxPct}. Paid to the influencer per sale.`}>
             <input name="commission_pct" type="number" required min={0} max={100} step={1} defaultValue={product ? Number(product.commission_pct) : 20} className={inputClass} />
           </Field>
-          <Field label="Promo code discount (%)" hint="What the buyer saves with a creator's code. 0 for none.">
-            <input name="promo_discount_pct" type="number" min={0} max={50} step={1} defaultValue={product ? Number(product.promo_discount_pct) : 10} className={inputClass} />
+          <Field label="Promo code discount (%)" hint="Optional. Leave at 0 for no buyer discount. Anything you add here comes out of your share, on top of the commission.">
+            <input name="promo_discount_pct" type="number" min={0} max={50} step={1} defaultValue={product ? Number(product.promo_discount_pct) : 0} className={inputClass} />
           </Field>
         </div>
         <Field label="Who can promote it">

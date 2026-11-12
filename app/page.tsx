@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HeroCrowd } from "@/components/hero-crowd";
 import { ProductCard } from "@/components/product-card";
 import { SplitReceipt } from "@/components/split-receipt";
 import { Badge, ButtonLink, Container, Eyebrow, SectionHeading, inputClass, buttonClass } from "@/components/ui";
@@ -19,52 +20,61 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Hero: centred headline over a soft sky glow, with a preview of the three sides of a sale */}
-      <section className="relative overflow-hidden border-b border-line bg-[radial-gradient(60rem_30rem_at_50%_-10%,#cfe0ff_0%,transparent_70%)]">
-        <Container className="pb-0 pt-14 text-center sm:pt-20">
-          <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-line bg-card px-4 py-1.5 text-xs font-medium shadow-sm">
+      {/* Hero: the main hook. Big promise, two clear buttons, and a crowd of creators underneath. */}
+      <section className="relative overflow-hidden border-b border-line bg-card">
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(50rem_20rem_at_50%_0%,#dbe7ff_0%,transparent_70%)]" />
+        <Container className="relative pt-14 text-center sm:pt-20">
+          <p className="rise mx-auto inline-flex items-center gap-2 rounded-full border border-line bg-card px-4 py-1.5 text-xs font-medium shadow-sm">
             <span className="size-2 rounded-full bg-success" />
             {launchSettings.platformFeePct}% launch fee · No listing fee · Made in India
           </p>
-          <h1 className="mx-auto mt-6 max-w-3xl text-[2.6rem] leading-[1.05] sm:text-6xl">
-            Sell digital products.
+          <h1 className="rise mx-auto mt-6 max-w-4xl text-[2.7rem] font-semibold leading-[1.03] sm:text-7xl" style={{ ["--d" as string]: "0.08s" }}>
+            Make it once.
             <br />
-            Let creators <em>bring the buyers.</em>
+            Let creators <em>sell it for you.</em>
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-ink-soft">
-            Sellers list templates, presets and creator tools. Influencers post about the ones they like and earn on
-            every sale. Sellers approve each post first.
+          <p className="rise mx-auto mt-5 max-w-xl text-lg leading-relaxed text-ink-soft" style={{ ["--d" as string]: "0.16s" }}>
+            List your templates, presets and creator tools. Influencers post about the ones they love and earn on
+            every sale. You approve every post first.
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <ButtonLink href="/sell">Start selling →</ButtonLink>
-            <ButtonLink href="/promote" variant="outline">Promote & earn</ButtonLink>
-          </div>
-          <form action="/search" className="mx-auto mt-6 flex max-w-md items-center gap-2">
-            <input name="q" placeholder="Search templates, presets, kits…" aria-label="Search products" className={`${inputClass} mt-0 rounded-full px-5 shadow-sm`} />
-            <button className={buttonClass("outline", "shrink-0")}>Search</button>
-          </form>
-
-          <div className="mx-auto mt-14 grid max-w-5xl items-end gap-5 text-left lg:grid-cols-[1fr_1.15fr_1fr]">
-            <div className="hidden rounded-t-3xl border border-b-0 border-line bg-card p-6 shadow-sm lg:block">
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-accent">Influencer</p>
-              <p className="mt-3 font-display text-xl">Post approved</p>
-              <p className="mt-1 text-sm text-ink-soft">Your code and link are ready.</p>
-              <p className="mt-4 rounded-xl bg-paper-deep px-4 py-3 font-mono text-sm">AMAN10</p>
-              <p className="mt-3 text-xs text-ink-soft">Example</p>
-            </div>
-            <div className="rounded-t-3xl shadow-xl shadow-accent/10">
-              <SplitReceipt />
-            </div>
-            <div className="hidden rounded-t-3xl border border-b-0 border-line bg-card p-6 shadow-sm lg:block">
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-accent">Buyer</p>
-              <p className="mt-3 font-display text-xl">In your library</p>
-              <p className="mt-1 text-sm text-ink-soft">Instant download after payment.</p>
-              <p className="mt-4 rounded-full bg-ink px-4 py-2.5 text-center text-sm font-medium text-white">Download</p>
-              <p className="mt-3 text-xs text-ink-soft">Example</p>
-            </div>
+          <div className="rise mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row" style={{ ["--d" as string]: "0.24s" }}>
+            <ButtonLink href="/signup" className="h-12 px-7 text-base">Join for free →</ButtonLink>
+            <ButtonLink href="/search" variant="outline" className="h-12 px-7 text-base">Explore products</ButtonLink>
           </div>
         </Container>
+
+        <div className="rise relative mx-auto mt-6 max-w-6xl" style={{ ["--d" as string]: "0.3s" }}>
+          {/* Floating examples of what each side sees */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 hidden md:block">
+            <span className="float absolute left-[4%] top-[6%] rounded-2xl border border-line bg-card px-4 py-2.5 text-sm font-medium shadow-lg">✓ Post approved</span>
+            <span className="float absolute left-[30%] top-[0%] rounded-2xl bg-ink px-4 py-2.5 font-mono text-sm text-white shadow-lg" style={{ ["--d" as string]: "1.2s" }}>AMAN10</span>
+            <span className="float absolute right-[27%] top-[2%] rounded-2xl border border-line bg-card px-4 py-2.5 text-sm font-medium text-success shadow-lg" style={{ ["--d" as string]: "0.6s" }}>+ ₹180 commission</span>
+            <span className="float absolute right-[3%] top-[10%] rounded-2xl bg-accent px-4 py-2.5 text-sm font-medium text-white shadow-lg" style={{ ["--d" as string]: "1.8s" }}>New sale · ₹900</span>
+          </div>
+          <HeroCrowd />
+        </div>
       </section>
+
+      {/* Where the money goes */}
+      <Container className="pt-16 sm:pt-24">
+        <div className="grid items-center gap-10 lg:grid-cols-2">
+          <div>
+            <Eyebrow>Clear money, every sale</Eyebrow>
+            <h2 className="mt-4 max-w-md text-3xl leading-tight sm:text-4xl">Everyone sees exactly who gets what.</h2>
+            <p className="mt-4 max-w-md leading-relaxed text-ink-soft">
+              The seller sets the price and the commission. The moment a buyer pays, the sale is split between the
+              seller, the influencer and the platform. No invoices to chase.
+            </p>
+            <form action="/search" className="mt-6 flex max-w-md items-center gap-2">
+              <input name="q" placeholder="Search templates, presets, kits…" aria-label="Search products" className={`${inputClass} mt-0 rounded-full px-5 shadow-sm`} />
+              <button className={buttonClass("outline", "shrink-0")}>Search</button>
+            </form>
+          </div>
+          <div className="rounded-3xl shadow-xl shadow-accent/10">
+            <SplitReceipt />
+          </div>
+        </div>
+      </Container>
 
       <Container className="pt-16 sm:pt-24">
         <SectionHeading

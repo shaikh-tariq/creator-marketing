@@ -13,7 +13,7 @@ export default async function SellerOverview() {
   const supabase = await createClient();
   const [products, orders, pending, ledger] = await Promise.all([
     supabase.from("products").select("id, title, status").eq("seller_id", profile.id).neq("status", "archived").order("created_at", { ascending: false }),
-    supabase.from("orders").select("id, net_paise, status, created_at, products(title)").eq("seller_id", profile.id).order("created_at", { ascending: false }),
+    supabase.from("orders").select("id, net_paise, status, created_at, influencer_id, terms_snapshot, products(title)").eq("seller_id", profile.id).order("created_at", { ascending: false }),
     supabase.from("submissions").select("id", { count: "exact", head: true }).eq("seller_id", profile.id).eq("status", "pending"),
     supabase.from("ledger_entries").select("amount_paise, available_at, kind, account_type").eq("account_id", profile.id),
   ]);
@@ -65,7 +65,14 @@ export default async function SellerOverview() {
               <li key={o.id} className="flex items-center justify-between gap-3 py-3 text-sm">
                 <span>
                   {(o.products as unknown as { title: string })?.title}
-                  <span className="ml-2 text-xs text-ink-soft">{shortDate(o.created_at)}</span>
+                  <span className="ml-2 text-xs text-ink-soft">
+                    {shortDate(o.created_at)} ·{" "}
+                    {(o.terms_snapshot as { promo_code?: string | null }).promo_code
+                      ? `promo code ${(o.terms_snapshot as { promo_code?: string }).promo_code}`
+                      : o.influencer_id
+                        ? "influencer link"
+                        : "direct sale"}
+                  </span>
                 </span>
                 <span className="flex items-center gap-3">
                   <span className="tabular-nums">{formatINR(o.net_paise)}</span>

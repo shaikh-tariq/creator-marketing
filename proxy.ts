@@ -6,6 +6,8 @@ import { supabaseConfigured, supabaseKey, supabaseUrl } from "@/lib/supabase/con
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
   if (!supabaseConfigured) return response;
+  // Visitors who are not logged in have no session to refresh, so skip the work entirely.
+  if (!request.cookies.getAll().some((c) => c.name.startsWith("sb-"))) return response;
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
@@ -20,7 +22,7 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  await supabase.auth.getUser();
+  await supabase.auth.getClaims();
   return response;
 }
 

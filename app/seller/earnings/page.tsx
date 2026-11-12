@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Empty, Notice, PageTitle, StatCards, StatusBadge, Table } from "@/components/ui";
+import { Badge, Empty, Notice, PageTitle, StatCards, StatusBadge, Table } from "@/components/ui";
 import { requireRole } from "@/lib/auth";
 import { balances, nameMap, shortDate } from "@/lib/data";
 import { formatINR } from "@/lib/money";
@@ -20,6 +20,10 @@ export default async function SellerEarnings() {
   ]);
   const orders = ordersRes.data ?? [];
   const bal = balances(ledgerRes.data ?? []);
+  const paidOrders = orders.filter((o) => o.status === "paid");
+  const viaCode = paidOrders.filter((o) => (o.terms_snapshot as { promo_code?: string | null }).promo_code).length;
+  const viaLink = paidOrders.filter((o) => o.influencer_id).length - viaCode;
+  const direct = paidOrders.length - viaCode - viaLink;
   const names = await nameMap(orders.map((o) => o.influencer_id).filter(Boolean) as string[]);
 
   return (
@@ -32,6 +36,11 @@ export default async function SellerEarnings() {
           { label: "Total earned", value: formatINR(bal.total), hint: "After fees, commission and refunds" },
         ]}
       />
+      {orders.length > 0 ? (
+        <p className="mt-4 text-sm text-ink-soft">
+          Of {paidOrders.length} paid {paidOrders.length === 1 ? "order" : "orders"}: {viaCode} through a promo code, {viaLink} through an influencer link, {direct} direct.
+        </p>
+      ) : null}
       <div className="mt-6">
         <Notice>Test mode: these are test orders, so no money is paid out. Real payouts start when the payment gateway is connected.</Notice>
       </div>
@@ -40,7 +49,7 @@ export default async function SellerEarnings() {
           <Empty title="No orders yet" text="Orders appear here the moment a buyer pays." />
         ) : (
           <Table
-            head={["Date", "Product", "Buyer paid", "Influencer", "Commission", "Fees", "You keep", "Status"]}
+            head={["Date", "Product", "Buyer paid", "How it sold", "Commission", "Fees", "You keep", "Status"]}
             rows={orders.map((o) => {
               const t = o.terms_snapshot as Record<string, number | string | null>;
               const fees = Number(t.platform_fee_paise) + (t.gateway_fee_borne_by === "seller" ? Number(t.gateway_fee_paise) : 0);
@@ -48,7 +57,17 @@ export default async function SellerEarnings() {
                 shortDate(o.created_at),
                 (o.products as unknown as { title: string })?.title,
                 formatINR(o.net_paise),
-                o.influencer_id ? names[o.influencer_id] : <span key="n" className="text-ink-soft">Direct</span>,
+                o.influencer_id ? (
+                  <span key="n" className="flex flex-col gap-1">
+                    <Badge tone="accent">{t.promo_code ? `Promo code ${t.promo_code}` : "Influencer link"}</Badge>
+                    <span className="text-xs text-ink-soft">by {names[o.influencer_id]}{o.discount_paise > 0 ? ` · buyer saved ${formatINR(o.discount_paise)}` : ""}</span>
+                  </span>
+                ) : (
+                  <span key="n" className="flex flex-col gap-1">
+                    <Badge>Direct sale</Badge>
+                    <span className="text-xs text-ink-soft">No influencer, no commission</span>
+                  </span>
+                ),
                 formatINR(Number(t.influencer_commission_paise)),
                 formatINR(fees),
                 <span key="k" className="font-medium">{o.status === "paid" ? formatINR(Number(t.seller_earning_paise)) : formatINR(0)}</span>,
