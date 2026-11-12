@@ -55,7 +55,7 @@ export function DashNav({ items }: { items: { href: string; label: string; count
           >
             {item.label}
             {item.count ? (
-              <span className={`rounded-full px-2 text-xs ${active ? "bg-paper/20" : "bg-clay text-paper"}`}>{item.count}</span>
+              <span className={`rounded-full px-2 text-xs ${active ? "bg-paper/20" : "bg-accent text-paper"}`}>{item.count}</span>
             ) : null}
           </Link>
         );
@@ -107,7 +107,7 @@ export function FileUploader({ productId, userId }: { productId: string; userId:
         <input type="file" className="sr-only" onChange={onChange} disabled={busy} />
       </label>
       {message ? (
-        <p className={`mt-3 text-sm ${message.kind === "ok" ? "text-moss" : "text-clay-deep"}`}>{message.text}</p>
+        <p className={`mt-3 text-sm ${message.kind === "ok" ? "text-success" : "text-accent-deep"}`}>{message.text}</p>
       ) : null}
     </div>
   );

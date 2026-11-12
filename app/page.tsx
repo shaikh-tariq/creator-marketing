@@ -19,27 +19,50 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="border-b border-line">
-        <Container className="grid gap-12 py-14 sm:py-20 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-          <div>
-            <Eyebrow>Digital products · Creator promotion · Made in India</Eyebrow>
-            <h1 className="mt-5 text-[2.6rem] leading-[1.05] sm:text-6xl">
-              Good digital products, promoted by creators who <em className="text-clay">actually use them.</em>
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
-              Sellers list templates, presets and creator tools. Influencers pick what they like, post about it and
-              earn a commission on every sale. Sellers approve each post before it goes live.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <ButtonLink href="/sell">Start selling</ButtonLink>
-              <ButtonLink href="/promote" variant="outline">Promote & earn</ButtonLink>
-            </div>
-            <form action="/search" className="mt-8 flex max-w-lg gap-2">
-              <input name="q" placeholder="Search templates, presets, kits…" aria-label="Search products" className={`${inputClass} mt-0 rounded-full px-5`} />
-              <button className={buttonClass("outline", "shrink-0")}>Search</button>
-            </form>
+      {/* Hero: centred headline over a soft sky glow, with a preview of the three sides of a sale */}
+      <section className="relative overflow-hidden border-b border-line bg-[radial-gradient(60rem_30rem_at_50%_-10%,#cfe0ff_0%,transparent_70%)]">
+        <Container className="pb-0 pt-14 text-center sm:pt-20">
+          <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-line bg-card px-4 py-1.5 text-xs font-medium shadow-sm">
+            <span className="size-2 rounded-full bg-success" />
+            {launchSettings.platformFeePct}% launch fee · No listing fee · Made in India
+          </p>
+          <h1 className="mx-auto mt-6 max-w-3xl text-[2.6rem] leading-[1.05] sm:text-6xl">
+            Sell digital products.
+            <br />
+            Let creators <em>bring the buyers.</em>
+          </h1>
+          <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-ink-soft">
+            Sellers list templates, presets and creator tools. Influencers post about the ones they like and earn on
+            every sale. Sellers approve each post first.
+          </p>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <ButtonLink href="/sell">Start selling →</ButtonLink>
+            <ButtonLink href="/promote" variant="outline">Promote & earn</ButtonLink>
           </div>
-          <SplitReceipt />
+          <form action="/search" className="mx-auto mt-6 flex max-w-md items-center gap-2">
+            <input name="q" placeholder="Search templates, presets, kits…" aria-label="Search products" className={`${inputClass} mt-0 rounded-full px-5 shadow-sm`} />
+            <button className={buttonClass("outline", "shrink-0")}>Search</button>
+          </form>
+
+          <div className="mx-auto mt-14 grid max-w-5xl items-end gap-5 text-left lg:grid-cols-[1fr_1.15fr_1fr]">
+            <div className="hidden rounded-t-3xl border border-b-0 border-line bg-card p-6 shadow-sm lg:block">
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-accent">Influencer</p>
+              <p className="mt-3 font-display text-xl">Post approved</p>
+              <p className="mt-1 text-sm text-ink-soft">Your code and link are ready.</p>
+              <p className="mt-4 rounded-xl bg-paper-deep px-4 py-3 font-mono text-sm">AMAN10</p>
+              <p className="mt-3 text-xs text-ink-soft">Example</p>
+            </div>
+            <div className="rounded-t-3xl shadow-xl shadow-accent/10">
+              <SplitReceipt />
+            </div>
+            <div className="hidden rounded-t-3xl border border-b-0 border-line bg-card p-6 shadow-sm lg:block">
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-accent">Buyer</p>
+              <p className="mt-3 font-display text-xl">In your library</p>
+              <p className="mt-1 text-sm text-ink-soft">Instant download after payment.</p>
+              <p className="mt-4 rounded-full bg-ink px-4 py-2.5 text-center text-sm font-medium text-white">Download</p>
+              <p className="mt-3 text-xs text-ink-soft">Example</p>
+            </div>
+          </div>
         </Container>
       </section>
 
@@ -62,7 +85,7 @@ export default async function HomePage() {
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <Badge tone={live ? "moss" : "neutral"}>{live ? "Open" : "Coming soon"}</Badge>
+                  <Badge tone={live ? "success" : "neutral"}>{live ? "Open" : "Coming soon"}</Badge>
                   <span aria-hidden className="text-ink-soft transition-transform group-hover:translate-x-1">→</span>
                 </div>
                 <h3 className={`mt-6 text-2xl sm:text-3xl ${live ? "" : "text-ink-soft"}`}>{hub.name}</h3>
@@ -89,7 +112,7 @@ export default async function HomePage() {
           {loop.map((step) => (
             <li key={step.n} className="bg-card p-7">
               <div className="flex items-baseline justify-between">
-                <span className="font-display text-4xl text-clay">{step.n}</span>
+                <span className="font-display text-4xl text-accent">{step.n}</span>
                 <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-soft">{step.who}</span>
               </div>
               <p className="mt-5 text-base leading-relaxed">{step.text}</p>
@@ -133,7 +156,7 @@ export default async function HomePage() {
       <Container className="pt-16 sm:pt-24">
         <div className="grid gap-5 lg:grid-cols-2">
           <div className="flex flex-col rounded-2xl bg-ink p-8 text-paper sm:p-10">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-sand">For sellers</p>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-sky">For sellers</p>
             <h2 className="mt-5 text-3xl leading-tight sm:text-4xl">Your products. Their audience. Your approval.</h2>
             <ul className="mt-6 space-y-3 text-sm leading-relaxed text-paper/80">
               <li>· {launchSettings.platformFeePct}% platform fee at launch, no listing fee</li>

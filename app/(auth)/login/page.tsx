@@ -22,7 +22,7 @@ export default async function LogInPage({ searchParams }: { searchParams: Promis
       </p>
       {error && errors[error] ? (
         <div className="mt-6">
-          <Notice>{errors[error]}</Notice>
+          <Notice tone="alert">{errors[error]}</Notice>
         </div>
       ) : null}
       <div className="mt-10">

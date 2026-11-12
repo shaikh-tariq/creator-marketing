@@ -5,11 +5,11 @@ import Link from "next/link";
 type Variant = "primary" | "outline" | "accent" | "light" | "danger";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-ink text-paper hover:bg-ink/85",
-  accent: "bg-clay text-paper hover:bg-clay-deep",
-  outline: "border border-ink/70 text-ink hover:bg-ink hover:text-paper",
-  light: "bg-paper text-ink hover:bg-card",
-  danger: "border border-clay/60 text-clay-deep hover:bg-clay hover:text-paper",
+  primary: "bg-ink text-white hover:bg-ink/85 shadow-sm",
+  accent: "bg-accent text-white hover:bg-accent-deep shadow-sm",
+  outline: "border border-line bg-card text-ink shadow-sm hover:border-ink/40",
+  light: "bg-white text-ink hover:bg-paper",
+  danger: "border border-alert/50 text-alert hover:bg-alert hover:text-white",
 };
 
 export function buttonClass(variant: Variant = "primary", extra = "") {
@@ -44,14 +44,14 @@ export function Container({ children, className = "" }: { children: React.ReactN
 }
 
 export function Eyebrow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <p className={`text-xs font-medium uppercase tracking-[0.18em] text-clay ${className}`}>{children}</p>;
+  return <p className={`text-xs font-medium uppercase tracking-[0.18em] text-accent ${className}`}>{children}</p>;
 }
 
-export function Badge({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "moss" | "clay" }) {
+export function Badge({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "success" | "accent" }) {
   const tones = {
     neutral: "border-line bg-card text-ink-soft",
-    moss: "border-moss/30 bg-moss/10 text-moss",
-    clay: "border-clay/30 bg-clay/10 text-clay-deep",
+    success: "border-success/30 bg-success/10 text-success",
+    accent: "border-accent/30 bg-accent/10 text-accent-deep",
   };
   return (
     <span className={`inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-medium ${tones[tone]}`}>
@@ -60,22 +60,22 @@ export function Badge({ children, tone = "neutral" }: { children: React.ReactNod
   );
 }
 
-const statusLabels: Record<string, [string, "neutral" | "moss" | "clay"]> = {
+const statusLabels: Record<string, [string, "neutral" | "success" | "accent"]> = {
   draft: ["Draft", "neutral"],
-  pending_review: ["In review", "clay"],
-  published: ["Live", "moss"],
+  pending_review: ["In review", "accent"],
+  published: ["Live", "success"],
   paused: ["Paused", "neutral"],
-  rejected: ["Rejected", "clay"],
+  rejected: ["Rejected", "accent"],
   archived: ["Archived", "neutral"],
-  applied: ["Waiting for seller", "clay"],
-  active: ["Active", "moss"],
-  pending: ["Pending", "clay"],
-  changes_requested: ["Changes requested", "clay"],
-  approved: ["Approved", "moss"],
-  paid: ["Paid", "moss"],
-  refunded: ["Refunded", "clay"],
-  failed: ["Failed", "clay"],
-  suspended: ["Suspended", "clay"],
+  applied: ["Waiting for seller", "accent"],
+  active: ["Active", "success"],
+  pending: ["Pending", "accent"],
+  changes_requested: ["Changes requested", "accent"],
+  approved: ["Approved", "success"],
+  paid: ["Paid", "success"],
+  refunded: ["Refunded", "accent"],
+  failed: ["Failed", "accent"],
+  suspended: ["Suspended", "accent"],
 };
 
 export function StatusBadge({ status }: { status: string }) {
@@ -97,15 +97,19 @@ export function SectionHeading({ number, eyebrow, title, intro }: { number: stri
   );
 }
 
-export function Notice({ children, tone = "clay" }: { children: React.ReactNode; tone?: "clay" | "moss" }) {
-  const tones = { clay: "border-clay/30 bg-clay/10 text-clay-deep", moss: "border-moss/30 bg-moss/10 text-moss" };
+export function Notice({ children, tone = "accent" }: { children: React.ReactNode; tone?: "accent" | "success" | "alert" }) {
+  const tones = {
+    accent: "border-accent/25 bg-accent/8 text-accent-deep",
+    success: "border-success/30 bg-success/10 text-success",
+    alert: "border-alert/30 bg-alert/8 text-alert",
+  };
   return <div className={`rounded-xl border px-4 py-3 text-sm leading-relaxed ${tones[tone]}`}>{children}</div>;
 }
 
 // Success or error message passed back from a button press (?ok=... or ?error=... in the address).
 export function Flash({ params }: { params: { ok?: string; error?: string } }) {
-  if (params.error) return <div className="mb-6"><Notice>{params.error}</Notice></div>;
-  if (params.ok) return <div className="mb-6"><Notice tone="moss">{params.ok}</Notice></div>;
+  if (params.error) return <div className="mb-6"><Notice tone="alert">{params.error}</Notice></div>;
+  if (params.ok) return <div className="mb-6"><Notice tone="success">{params.ok}</Notice></div>;
   return null;
 }
 

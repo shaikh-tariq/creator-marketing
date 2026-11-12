@@ -48,7 +48,7 @@ export default async function AdminLedger() {
               <span key="o" className="font-mono text-xs">{e.order_id.slice(0, 8)}</span>,
               kindLabels[e.kind] ?? e.kind,
               e.account_id ? names[e.account_id] : e.account_type === "platform" ? "Creator Marketing" : "Payment gateway",
-              <span key="a" className={`tabular-nums ${e.amount_paise < 0 ? "text-clay-deep" : ""}`}>{formatINR(e.amount_paise)}</span>,
+              <span key="a" className={`tabular-nums ${e.amount_paise < 0 ? "text-accent-deep" : ""}`}>{formatINR(e.amount_paise)}</span>,
               shortDate(e.available_at),
             ])}
           />

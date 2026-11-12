@@ -32,7 +32,7 @@ export default async function OrderPage({ params, searchParams }: Props) {
   return (
     <Container className="max-w-2xl py-12 sm:py-16">
       <Flash params={flash} />
-      <p className="text-xs font-medium uppercase tracking-[0.18em] text-moss">{paid ? "Payment received" : "Order"}</p>
+      <p className="text-xs font-medium uppercase tracking-[0.18em] text-success">{paid ? "Payment received" : "Order"}</p>
       <h1 className="mt-4 text-5xl leading-tight">{paid ? "Thank you. Your files are ready." : "This order was refunded."}</h1>
 
       <div className="mt-8 rounded-2xl border border-line bg-card p-6">

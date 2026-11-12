@@ -4,10 +4,10 @@ import type { Product } from "@/lib/types";
 
 // Cover art drawn in CSS from four colour schemes (sellers pick one). Image uploads come later.
 const artStyles = [
-  { bg: "bg-[#d9c7a5]", a: "bg-[#a84a24]", b: "bg-[#fbf9f4]", c: "bg-[#211d18]" },
-  { bg: "bg-[#c9b8a0]", a: "bg-[#45563a]", b: "bg-[#f5f1e8]", c: "bg-[#a84a24]" },
-  { bg: "bg-[#e3dccb]", a: "bg-[#211d18]", b: "bg-[#dcc9a3]", c: "bg-[#45563a]" },
-  { bg: "bg-[#bfa98a]", a: "bg-[#fbf9f4]", b: "bg-[#873a1b]", c: "bg-[#211d18]" },
+  { bg: "bg-[#dbe7ff]", a: "bg-[#2f62d8]", b: "bg-[#ffffff]", c: "bg-[#0f172a]" },
+  { bg: "bg-[#fff1c2]", a: "bg-[#0f172a]", b: "bg-[#ffd45a]", c: "bg-[#2f62d8]" },
+  { bg: "bg-[#dff3ea]", a: "bg-[#17805a]", b: "bg-[#ffffff]", c: "bg-[#0f172a]" },
+  { bg: "bg-[#e8e3ff]", a: "bg-[#6a58d6]", b: "bg-[#ffffff]", c: "bg-[#0f172a]" },
 ];
 
 export function ProductArt({ art, format, className = "" }: { art: number; format?: string; className?: string }) {
@@ -45,12 +45,12 @@ export function ProductCard({ product }: { product: Product }) {
       <ProductArt art={product.art} format={product.format} className="aspect-[4/3]" />
       <div className="flex flex-1 flex-col p-5">
         <span className="text-xs text-ink-soft">by {sellerName(product)}</span>
-        <h3 className="mt-2 text-xl leading-snug group-hover:text-clay-deep">{product.title}</h3>
+        <h3 className="mt-2 text-xl leading-snug group-hover:text-accent-deep">{product.title}</h3>
         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink-soft">{product.summary}</p>
         <div className="mt-auto pt-5">
           <div className="flex items-end justify-between border-t border-line pt-4">
             <span className="font-display text-2xl">{formatINR(product.price_paise)}</span>
-            <span className="text-xs text-moss">Influencers earn {Number(product.commission_pct)}%</span>
+            <span className="text-xs text-success">Influencers earn {Number(product.commission_pct)}%</span>
           </div>
         </div>
       </div>

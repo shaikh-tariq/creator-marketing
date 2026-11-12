@@ -45,7 +45,7 @@ export function SplitReceipt({
         ))}
         <div className="flex items-baseline justify-between gap-4 pt-4">
           <dt className="font-medium">Seller keeps</dt>
-          <dd className="font-display text-3xl tabular-nums text-moss">{formatINR(r.sellerEarningPaise)}</dd>
+          <dd className="font-display text-3xl tabular-nums text-success">{formatINR(r.sellerEarningPaise)}</dd>
         </div>
       </dl>
       <p className="mt-4 text-xs leading-relaxed text-ink-soft">

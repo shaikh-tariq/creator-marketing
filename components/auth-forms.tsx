@@ -16,10 +16,10 @@ const roles = [
 ] as const;
 
 function Messages({ state }: { state: FormState }) {
-  if (state.error) return <Notice>{state.error}</Notice>;
+  if (state.error) return <Notice tone="alert">{state.error}</Notice>;
   if (state.success)
     return (
-      <div className="rounded-xl border border-moss/30 bg-moss/10 px-4 py-3 text-sm text-moss">{state.success}</div>
+      <div className="rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">{state.success}</div>
     );
   return null;
 }
@@ -78,7 +78,7 @@ export function SignUpForm({ defaultRole }: { defaultRole: string }) {
       </div>
 
       <label className="flex items-start gap-3 text-sm leading-relaxed text-ink-soft">
-        <input type="checkbox" name="consent" required className="mt-1 size-4 accent-[#211d18]" />
+        <input type="checkbox" name="consent" required className="mt-1 size-4 accent-[#0f172a]" />
         <span>
           I agree to the <Link href="/legal/terms" className="underline">Terms</Link> and{" "}
           <Link href="/legal/privacy" className="underline">Privacy policy</Link>, and to my details being used

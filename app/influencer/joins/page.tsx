@@ -59,7 +59,7 @@ export default async function MyJoins({ searchParams }: { searchParams: Promise<
 
                 {link ? (
                   <div className="mt-5 rounded-xl bg-paper-deep p-4">
-                    <p className="text-xs font-medium uppercase tracking-[0.16em] text-moss">{link.active ? "Your link and code" : "Link and code (switched off)"}</p>
+                    <p className="text-xs font-medium uppercase tracking-[0.16em] text-success">{link.active ? "Your link and code" : "Link and code (switched off)"}</p>
                     <div className="mt-3 flex flex-wrap items-center gap-3">
                       <CopyText text={`${origin}/r/${link.ref_slug}`} />
                       <CopyText text={link.promo_code} />
@@ -110,7 +110,7 @@ export default async function MyJoins({ searchParams }: { searchParams: Promise<
                         <textarea name="caption" rows={3} maxLength={2000} className={textareaClass} />
                       </Field>
                       <label className="flex items-start gap-3 text-sm leading-relaxed text-ink-soft">
-                        <input type="checkbox" name="disclosure" required className="mt-1 size-4 accent-[#211d18]" />
+                        <input type="checkbox" name="disclosure" required className="mt-1 size-4 accent-[#0f172a]" />
                         <span>My post is clearly marked as a paid partnership (for example #ad or the platform&apos;s paid-partnership label).</span>
                       </label>
                       <SubmitButton className={buttonClass("accent")}>Submit for approval</SubmitButton>

@@ -18,7 +18,7 @@ export function SiteHeader({ profile }: { profile: Profile | null }) {
     <header className="sticky top-0 z-40 border-b border-line bg-paper/90 backdrop-blur">
       <Container className="flex h-16 items-center justify-between gap-6">
         <Link href="/" className="font-display text-xl tracking-tight">
-          Creator <span className="italic text-clay">Marketing</span>
+          Creator <span className="text-accent">Marketing</span>
           <span className="sr-only"> {site.tagline}</span>
         </Link>
 

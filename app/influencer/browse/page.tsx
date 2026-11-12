@@ -52,9 +52,9 @@ export default async function Browse({ searchParams }: Props) {
                 <p className="mt-1 text-xs text-ink-soft">by {sellerName(p)} · {formatINR(p.price_paise)}</p>
                 {p.brief_text ? <p className="mt-2 text-sm leading-relaxed text-ink-soft"><span className="font-medium text-ink">Brief:</span> {p.brief_text}</p> : null}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <Badge tone="moss">Earn {Number(p.commission_pct)}% · {formatINR(Math.round((p.price_paise * Number(p.commission_pct)) / 100))} a sale</Badge>
+                  <Badge tone="success">Earn {Number(p.commission_pct)}% · {formatINR(Math.round((p.price_paise * Number(p.commission_pct)) / 100))} a sale</Badge>
                   {Number(p.promo_discount_pct) > 0 ? <Badge>Buyers get {Number(p.promo_discount_pct)}% off</Badge> : null}
-                  {p.join_mode === "apply" ? <Badge tone="clay">Seller approves who joins</Badge> : null}
+                  {p.join_mode === "apply" ? <Badge tone="accent">Seller approves who joins</Badge> : null}
                 </div>
               </div>
               {joined.has(p.id) ? (

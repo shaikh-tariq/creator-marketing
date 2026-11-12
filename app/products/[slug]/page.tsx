@@ -58,7 +58,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
         {product.hubs ? <Link href={`/hubs/${product.hubs.slug}`} className="hover:text-ink">{product.hubs.name}</Link> : null}
       </nav>
 
-      {error ? <div className="mt-4"><Notice>{error}</Notice></div> : null}
+      {error ? <div className="mt-4"><Notice tone="alert">{error}</Notice></div> : null}
       {!live ? (
         <div className="mt-4">
           <Notice>This product is not live for buyers. Status: <StatusBadge status={product.status} /></Notice>
@@ -108,7 +108,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
                 {list.map((r) => (
                   <li key={r.id} className="rounded-xl border border-line bg-card p-4">
                     <p className="text-sm">
-                      <span aria-label={`${r.rating} out of 5`} className="text-clay">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
+                      <span aria-label={`${r.rating} out of 5`} className="text-accent">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
                       <span className="ml-3 text-xs text-ink-soft">Verified buyer · {shortDate(r.created_at)}</span>
                     </p>
                     {r.body ? <p className="mt-2 text-sm leading-relaxed text-ink-soft">{r.body}</p> : null}
@@ -120,7 +120,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
         </div>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          {product.format ? <Badge tone="moss">{product.format}</Badge> : null}
+          {product.format ? <Badge tone="success">{product.format}</Badge> : null}
           <h1 className="mt-4 text-4xl leading-tight">{product.title}</h1>
           <p className="mt-2 text-sm text-ink-soft">by {sellerName(product)}</p>
           <p className="mt-5 text-base leading-relaxed text-ink-soft">{product.summary}</p>
@@ -140,7 +140,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
           </div>
 
           <div className="mt-5 rounded-2xl bg-paper-deep p-6">
-            <p className="text-xs font-medium uppercase tracking-[0.16em] text-clay">For influencers</p>
+            <p className="text-xs font-medium uppercase tracking-[0.16em] text-accent">For influencers</p>
             <p className="mt-3 font-display text-2xl">
               Earn {Number(product.commission_pct)}% · up to {formatINR(commissionPaise)} a sale
             </p>

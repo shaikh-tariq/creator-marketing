@@ -43,9 +43,9 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
           Test mode. No money is taken. Pressing pay creates a real order, download and earnings split so the whole
           flow can be tested before a payment gateway is connected.
         </Notice>
-        {error ? <Notice>{error}</Notice> : null}
-        {quote.code_error ? <Notice>{quote.code_error}</Notice> : null}
-        {codeApplied ? <Notice tone="moss">Code {quote.promo_code} applied: {Number(quote.discount_pct)}% off.</Notice> : null}
+        {error ? <Notice tone="alert">{error}</Notice> : null}
+        {quote.code_error ? <Notice tone="alert">{quote.code_error}</Notice> : null}
+        {codeApplied ? <Notice tone="success">Code {quote.promo_code} applied: {Number(quote.discount_pct)}% off.</Notice> : null}
       </div>
 
       <div className="mt-8 grid gap-8 md:grid-cols-[1fr_1fr]">
@@ -72,7 +72,7 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
             {quote.discount_paise > 0 ? (
               <div className="flex justify-between py-3.5">
                 <dt className="text-ink-soft">Promo discount</dt>
-                <dd className="tabular-nums text-moss">− {formatINR(quote.discount_paise)}</dd>
+                <dd className="tabular-nums text-success">− {formatINR(quote.discount_paise)}</dd>
               </div>
             ) : null}
             <div className="flex items-baseline justify-between py-4">

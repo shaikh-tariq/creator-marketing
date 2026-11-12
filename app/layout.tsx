@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "@fontsource-variable/fraunces";
+import "@fontsource-variable/outfit";
 import "@fontsource-variable/dm-sans";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";

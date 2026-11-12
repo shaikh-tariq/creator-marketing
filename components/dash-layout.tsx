@@ -20,7 +20,7 @@ export function DashLayout({
     <Container className="py-8 sm:py-10">
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
         <div>
-          <Badge tone="clay">{roleLabel}</Badge>
+          <Badge tone="accent">{roleLabel}</Badge>
           <h1 className="mt-3 text-4xl sm:text-5xl">{first ? `Hello, ${first}` : `${roleLabel} dashboard`}</h1>
         </div>
         <form action={signOut}>

@@ -72,7 +72,7 @@ export default async function ReviewQueue({ searchParams }: { searchParams: Prom
                   </p>
                 </div>
                 <span className="flex items-center gap-2">
-                  {ownerStatus[p.seller_id] !== "active" ? <Badge tone="clay">Seller not approved yet</Badge> : null}
+                  {ownerStatus[p.seller_id] !== "active" ? <Badge tone="accent">Seller not approved yet</Badge> : null}
                   <StatusBadge status={p.status} />
                 </span>
               </div>

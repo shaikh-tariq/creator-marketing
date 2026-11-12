@@ -44,7 +44,7 @@ export default function SellPage() {
           <div>
             <Eyebrow>For sellers</Eyebrow>
             <h1 className="mt-5 text-5xl leading-[1.05] sm:text-6xl">
-              Sell your work. Let creators bring the <em className="text-clay">buyers.</em>
+              Sell your work. Let creators bring the <em className="text-accent">buyers.</em>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
               List once. Influencers across five platforms promote your product for a commission you choose, and
@@ -66,7 +66,7 @@ export default function SellPage() {
         <ol className="mt-10 divide-y divide-line border-y border-line">
           {steps.map((s, i) => (
             <li key={s.t} className="grid gap-2 py-6 sm:grid-cols-[4rem_1fr_1.4fr] sm:items-baseline sm:gap-6">
-              <span className="font-display text-3xl text-clay">{String(i + 1).padStart(2, "0")}</span>
+              <span className="font-display text-3xl text-accent">{String(i + 1).padStart(2, "0")}</span>
               <h3 className="text-xl">{s.t}</h3>
               <p className="text-sm leading-relaxed text-ink-soft">{s.d}</p>
             </li>

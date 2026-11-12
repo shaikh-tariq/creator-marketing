@@ -8,7 +8,7 @@ export function SiteFooter() {
       <Container className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <p className="font-display text-2xl">
-            Creator <span className="italic text-sand">Marketing</span>
+            Creator <span className="text-sky">Marketing</span>
           </p>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-paper/70">{site.description}</p>
         </div>
@@ -18,7 +18,7 @@ export function SiteFooter() {
             <li key={h.slug}>
               <Link href={`/hubs/${h.slug}`} className="hover:text-paper">
                 {h.name}
-                {h.status === "coming_soon" ? <span className="ml-2 text-xs text-sand">Soon</span> : null}
+                {h.status === "coming_soon" ? <span className="ml-2 text-xs text-sky">Soon</span> : null}
               </Link>
             </li>
           ))}
@@ -47,7 +47,7 @@ export function SiteFooter() {
 function FooterColumn({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-[0.18em] text-sand">{title}</p>
+      <p className="text-xs font-medium uppercase tracking-[0.18em] text-sky">{title}</p>
       <ul className="mt-4 space-y-3 text-sm text-paper/75">{children}</ul>
     </div>
   );
