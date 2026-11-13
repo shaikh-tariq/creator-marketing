@@ -18,14 +18,32 @@ const signUpSchema = z.object({
   // Admin is never selectable here. Admins are set directly in the database.
   role: z.enum(["seller", "influencer", "buyer"], "Please choose an account type"),
   consent: z.literal("on", "Please accept the terms and privacy policy"),
+  // Extra details from the sign-up steps (all optional here; the database trims and checks them again).
+  brand_name: z.string().max(60).optional(),
+  niche: z.string().max(80).optional(),
+  follower_range: z.string().max(30).optional(),
+  channels: z.string().max(2000).optional(),
 });
+
+function parseChannels(raw: string | undefined) {
+  try {
+    const list = JSON.parse(raw || "[]");
+    if (!Array.isArray(list)) return [];
+    return list
+      .filter((c) => c && typeof c.platform === "string" && typeof c.url === "string" && /^https?:\/\//i.test(c.url))
+      .slice(0, 5)
+      .map((c) => ({ platform: c.platform, url: c.url.slice(0, 300) }));
+  } catch {
+    return [];
+  }
+}
 
 export async function signUp(_prev: FormState, formData: FormData): Promise<FormState> {
   if (!supabaseConfigured) return { error: notConnected };
 
   const parsed = signUpSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
-  const { full_name, email, password, role } = parsed.data;
+  const { full_name, email, password, role, brand_name, niche, follower_range, channels } = parsed.data;
 
   const origin = (await headers()).get("origin") ?? "";
   const supabase = await createClient();
@@ -35,7 +53,15 @@ export async function signUp(_prev: FormState, formData: FormData): Promise<Form
     options: {
       emailRedirectTo: `${origin}/auth/confirm`,
       // The database trigger reads these to create the profile row (see the migration).
-      data: { full_name, role, consent_at: new Date().toISOString() },
+      data: {
+        full_name,
+        role,
+        consent_at: new Date().toISOString(),
+        brand_name: role === "seller" ? brand_name ?? "" : "",
+        niche: role === "influencer" ? niche ?? "" : "",
+        follower_range: role === "influencer" ? follower_range ?? "" : "",
+        channels: role === "influencer" ? parseChannels(channels) : [],
+      },
     },
   });
 

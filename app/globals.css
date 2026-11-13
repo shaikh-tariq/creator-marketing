@@ -179,3 +179,8 @@ h2 em {
   animation: pop 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   animation-delay: var(--d, 0s);
 }
+
+/* Sign-up and log-in pages are focused screens: no footer underneath them. */
+body:has(.auth-shell) > footer {
+  display: none;
+}
