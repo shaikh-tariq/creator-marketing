@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { logIn, setPassword, type FormState } from "@/app/(auth)/actions";
+import Link from "next/link";
+import { logIn, requestPasswordReset, setPassword, type FormState } from "@/app/(auth)/actions";
 import { buttonClass, Notice } from "./ui";
 
 const inputClass =
@@ -28,7 +29,12 @@ export function LogInForm({ next }: { next?: string }) {
         <input id="email" name="email" type="email" autoComplete="email" required className={inputClass} />
       </div>
       <div>
-        <label htmlFor="password" className={labelClass}>Password</label>
+        <div className="flex items-baseline justify-between">
+          <label htmlFor="password" className={labelClass}>Password</label>
+          <Link href="/forgot-password" className="text-sm text-accent-deep underline-offset-4 hover:underline">
+            Forgot password?
+          </Link>
+        </div>
         <input
           id="password"
           name="password"
@@ -47,7 +53,31 @@ export function LogInForm({ next }: { next?: string }) {
 }
 
 // Choose a password (typed twice). Used on the last sign-up step and on the page reached from the email link.
-export function PasswordForm() {
+// Forgot password: asks for the email and sends the reset link.
+export function ForgotPasswordForm() {
+  const [state, action, pending] = useActionState(requestPasswordReset, {});
+  if (state.success)
+    return (
+      <div className="rounded-2xl border border-success/30 bg-success/10 p-5 text-success">
+        <p className="font-semibold">Check your inbox</p>
+        <p className="mt-1 text-sm">{state.success}</p>
+      </div>
+    );
+  return (
+    <form action={action} className="space-y-6">
+      <div>
+        <label htmlFor="reset-email" className={labelClass}>Email</label>
+        <input id="reset-email" name="email" type="email" autoComplete="email" required autoFocus className={inputClass} />
+      </div>
+      <Messages state={state} />
+      <button type="submit" disabled={pending} className={buttonClass("primary", "h-12 w-full text-base")}>
+        {pending ? "Sending…" : "Send reset link"}
+      </button>
+    </form>
+  );
+}
+
+export function PasswordForm({ submitLabel = "Save password and continue" }: { submitLabel?: string }) {
   const [state, action, pending] = useActionState(setPassword, {});
   return (
     <form action={action} className="space-y-5">
@@ -62,7 +92,7 @@ export function PasswordForm() {
       </div>
       <Messages state={state} />
       <button type="submit" disabled={pending} className={buttonClass("primary", "h-12 w-full text-base")}>
-        {pending ? "Saving…" : "Save password and continue"}
+        {pending ? "Saving…" : submitLabel}
       </button>
     </form>
   );

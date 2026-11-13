@@ -3,8 +3,8 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 import { supabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
-// Only the sign-up and log-in email types are accepted here.
-const allowedTypes: EmailOtpType[] = ["email", "signup", "magiclink"];
+// Sign-up, log-in and password-reset email types are accepted here.
+const allowedTypes: EmailOtpType[] = ["email", "signup", "magiclink", "recovery"];
 
 function safeNext(value: string | null) {
   const next = value ?? "";

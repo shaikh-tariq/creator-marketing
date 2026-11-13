@@ -127,6 +127,23 @@ export async function logIn(_prev: FormState, formData: FormData): Promise<FormS
   redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard");
 }
 
+// Forgot password: email a link that logs the person in and opens the "choose a new password" page.
+// The reply is the same whether or not the email has an account, so nobody can check who is signed up.
+export async function requestPasswordReset(_prev: FormState, formData: FormData): Promise<FormState> {
+  if (!supabaseConfigured) return { error: notConnected };
+  const parsed = z.email("Please enter a valid email").safeParse(String(formData.get("email") ?? "").trim());
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const origin = (await headers()).get("origin") ?? "";
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
+    redirectTo: `${origin}/auth/confirm?next=${encodeURIComponent("/reset-password")}`,
+  });
+  if (error && /rate limit|security purposes/i.test(error.message)) {
+    return { error: "Too many emails were requested. Please wait a minute and try again." };
+  }
+  return { success: "If an account exists for that email, a reset link is on its way. Open it in this browser." };
+}
+
 export async function signOut() {
   if (supabaseConfigured) {
     const supabase = await createClient();

@@ -7,6 +7,7 @@ export const metadata: Metadata = { title: "Log in" };
 
 const errors: Record<string, string> = {
   confirm: "That verification link did not work or has expired. Try logging in, or sign up again.",
+  reset: "That reset link did not work or has expired. Ask for a new one from \"Forgot password?\".",
   suspended: "This account is suspended. Contact support if you think this is a mistake.",
 };
 
