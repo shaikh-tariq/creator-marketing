@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { coverUrl } from "@/lib/media";
 import { formatINR } from "@/lib/money";
 import type { Product } from "@/lib/types";
 
-// Cover art drawn in CSS from four colour schemes (sellers pick one). Image uploads come later.
+// Cover art drawn in CSS from four colour schemes. Used when a seller has not uploaded their own cover image.
 const artStyles = [
   { bg: "bg-[#dbe7ff]", a: "bg-[#2f62d8]", b: "bg-[#ffffff]", c: "bg-[#0f172a]" },
   { bg: "bg-[#fff1c2]", a: "bg-[#0f172a]", b: "bg-[#ffd45a]", c: "bg-[#2f62d8]" },
@@ -32,6 +33,35 @@ export function ProductArt({ art, format, className = "" }: { art: number; forma
   );
 }
 
+// The seller's uploaded cover image if there is one, otherwise the cover style they picked.
+export function ProductCover({
+  cover,
+  art,
+  title = "",
+  format,
+  className = "",
+}: {
+  cover?: string | null;
+  art: number;
+  title?: string;
+  format?: string;
+  className?: string;
+}) {
+  const url = coverUrl(cover);
+  if (!url) return <ProductArt art={art} format={format} className={className} />;
+  return (
+    <div className={`relative overflow-hidden bg-paper-deep ${className}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={url} alt={title} loading="lazy" className="size-full object-cover" />
+      {format ? (
+        <span className="absolute bottom-3 left-3 rounded-full bg-ink/85 px-2.5 py-1 text-[11px] font-medium tracking-wide text-paper">
+          {format}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 export function sellerName(product: Product) {
   return product.seller_profiles?.brand_name || "Independent seller";
 }
@@ -42,7 +72,7 @@ export function ProductCard({ product }: { product: Product }) {
       href={`/products/${product.slug}`}
       className="lift group flex flex-col overflow-hidden rounded-2xl border border-line bg-card"
     >
-      <ProductArt art={product.art} format={product.format} className="aspect-[4/3]" />
+      <ProductCover cover={product.cover_path} art={product.art} title={product.title} format={product.format} className="aspect-[4/3]" />
       <div className="flex flex-1 flex-col p-5">
         <span className="text-xs text-ink-soft">by {sellerName(product)}</span>
         <h3 className="mt-2 text-xl leading-snug group-hover:text-accent-deep">{product.title}</h3>

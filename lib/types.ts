@@ -15,6 +15,7 @@ export type Product = {
   brief_text: string;
   license_text: string;
   art: number;
+  cover_path: string | null;
   status: "draft" | "pending_review" | "published" | "paused" | "rejected" | "archived";
   rejected_reason: string | null;
   created_at: string;

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { addReview, downloadFile } from "@/app/actions";
 import { SubmitButton } from "@/components/client-bits";
-import { ProductArt } from "@/components/product-card";
+import { ProductCover } from "@/components/product-card";
 import { ButtonLink, Container, Empty, Flash, StatusBadge, inputClass, smallButton, textareaClass } from "@/components/ui";
 import { requireRole } from "@/lib/auth";
 import { shortDate } from "@/lib/data";
@@ -19,7 +19,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
 
   const { data: ordersData } = await supabase
     .from("orders")
-    .select("id, product_id, net_paise, status, payment_ref, created_at, products(title, slug, art, format)")
+    .select("id, product_id, net_paise, status, payment_ref, created_at, products(title, slug, art, cover_path, format)")
     .eq("buyer_id", profile.id)
     .order("created_at", { ascending: false });
   const orders = ordersData ?? [];
@@ -48,12 +48,12 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
       ) : (
         <ul className="mt-8 space-y-5">
           {orders.map((o) => {
-            const product = o.products as unknown as { title: string; slug: string; art: number; format: string };
+            const product = o.products as unknown as { title: string; slug: string; art: number; cover_path: string | null; format: string };
             const mine = files.filter((f) => f.product_id === o.product_id);
             const paid = o.status === "paid";
             return (
               <li key={o.id} className="grid gap-5 rounded-2xl border border-line bg-card p-5 sm:grid-cols-[10rem_1fr]">
-                <ProductArt art={product.art} format={product.format} className="aspect-[4/3] rounded-xl" />
+                <ProductCover cover={product.cover_path} art={product.art} title={product.title} format={product.format} className="aspect-[4/3] rounded-xl" />
                 <div>
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>

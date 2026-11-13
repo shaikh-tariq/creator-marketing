@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "New product" };
 
 export default async function NewProduct({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
   const flash = await searchParams;
-  await requireRole(["seller"]);
+  const profile = await requireRole(["seller"]);
   const supabase = await createClient();
   const { data: hubs } = await supabase.from("hubs").select("id, name").eq("status", "live").order("sort_order");
 
@@ -16,7 +16,7 @@ export default async function NewProduct({ searchParams }: { searchParams: Promi
     <>
       <Flash params={flash} />
       <PageTitle title="New product" intro="Step 1 of 3: describe it. Next you upload the file, then submit it for review." />
-      <ProductForm hubs={hubs ?? []} />
+      <ProductForm hubs={hubs ?? []} userId={profile.id} />
     </>
   );
 }

@@ -185,6 +185,65 @@ export function PostImagePicker({ userId }: { userId: string }) {
   );
 }
 
+// Lets a seller upload their own cover image for a product. Uploads straight to storage, shows a preview,
+// and the form saves the path. Clearing it falls back to the cover style.
+export function CoverPicker({ userId, currentPath, currentUrl }: { userId: string; currentPath?: string | null; currentUrl?: string | null }) {
+  const [path, setPath] = useState(currentPath ?? "");
+  const [preview, setPreview] = useState(currentUrl ?? "");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  async function onChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError("");
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) return setError("Use a PNG, JPG or WebP image.");
+    if (file.size > 5 * 1024 * 1024) return setError("The image is over 5 MB.");
+    setBusy(true);
+    const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+    const target = `${userId}/${Date.now()}.${ext}`;
+    const { error: uploadError } = await createClient().storage.from("product-covers").upload(target, file);
+    setBusy(false);
+    e.target.value = "";
+    if (uploadError) return setError(uploadError.message);
+    if (preview.startsWith("blob:")) URL.revokeObjectURL(preview);
+    setPath(target);
+    setPreview(URL.createObjectURL(file));
+  }
+
+  function remove() {
+    if (preview.startsWith("blob:")) URL.revokeObjectURL(preview);
+    setPath("");
+    setPreview("");
+    setError("");
+  }
+
+  return (
+    <div>
+      <input type="hidden" name="cover_path" value={path} />
+      <label className="flex cursor-pointer items-center gap-4 rounded-xl border border-dashed border-ink/30 bg-paper p-3 text-sm transition-colors hover:border-ink">
+        {preview ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={preview} alt="Your cover preview" className="aspect-[4/3] w-32 rounded-lg object-cover" />
+        ) : (
+          <span className="flex aspect-[4/3] w-32 items-center justify-center rounded-lg bg-paper-deep text-2xl text-accent">＋</span>
+        )}
+        <span>
+          <span className="block font-medium">{busy ? "Uploading…" : preview ? "Change cover image" : "Upload your own cover image"}</span>
+          <span className="mt-1 block text-xs text-ink-soft">Landscape works best (4:3, for example 1200 × 900). PNG, JPG or WebP, up to 5 MB.</span>
+        </span>
+        <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={onChange} disabled={busy} />
+      </label>
+      {preview ? (
+        <button type="button" onClick={remove} className="mt-2 text-xs text-ink-soft underline hover:text-ink">
+          Remove image and use a cover style instead
+        </button>
+      ) : null}
+      {error ? <p className="mt-2 text-sm text-alert">{error}</p> : null}
+    </div>
+  );
+}
+
 // Fades a section in the first time it scrolls into view.
 export function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null);

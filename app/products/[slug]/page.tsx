@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { joinProduct } from "@/app/actions";
 import { SubmitButton } from "@/components/client-bits";
-import { ProductArt, sellerName } from "@/components/product-card";
+import { ProductCover, sellerName } from "@/components/product-card";
 import { Badge, ButtonLink, Container, Notice, StatusBadge, buttonClass, inputClass } from "@/components/ui";
 import { getProfile } from "@/lib/auth";
 import { getProductBySlug, shortDate } from "@/lib/data";
@@ -67,7 +67,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
 
       <div className="mt-6 grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
         <div>
-          <ProductArt art={product.art} format={product.format} className="aspect-[4/3] rounded-2xl" />
+          <ProductCover cover={product.cover_path} art={product.art} title={product.title} format={product.format} className="aspect-[4/3] rounded-2xl" />
 
           {product.description ? (
             <section className="mt-10 border-t border-line pt-8">

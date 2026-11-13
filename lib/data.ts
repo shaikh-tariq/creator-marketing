@@ -4,7 +4,7 @@ import { createClient } from "./supabase/server";
 import type { LedgerEntry, Product } from "./types";
 
 export const PRODUCT_COLS =
-  "id, seller_id, hub_id, title, slug, summary, description, format, includes, price_paise, commission_pct, promo_discount_pct, join_mode, brief_text, license_text, art, status, rejected_reason, created_at, seller_profiles(brand_name), hubs!inner(name, slug)";
+  "id, seller_id, hub_id, title, slug, summary, description, format, includes, price_paise, commission_pct, promo_discount_pct, join_mode, brief_text, license_text, art, cover_path, status, rejected_reason, created_at, seller_profiles(brand_name), hubs!inner(name, slug)";
 
 // Live products for the public pages.
 export async function listProducts(opts: { hubSlug?: string; q?: string; limit?: number } = {}): Promise<Product[]> {

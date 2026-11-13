@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { joinProduct } from "@/app/actions";
 import { SubmitButton } from "@/components/client-bits";
-import { ProductArt, sellerName } from "@/components/product-card";
+import { ProductCover, sellerName } from "@/components/product-card";
 import { Badge, Empty, Flash, PageTitle, buttonClass, inputClass, smallButton } from "@/components/ui";
 import { requireRole } from "@/lib/auth";
 import { listProducts } from "@/lib/data";
@@ -46,7 +46,7 @@ export default async function Browse({ searchParams }: Props) {
         <ul className="space-y-4">
           {sorted.map((p) => (
             <li key={p.id} className="grid gap-4 rounded-2xl border border-line bg-card p-4 sm:grid-cols-[9rem_1fr_auto] sm:items-center">
-              <ProductArt art={p.art} className="aspect-[4/3] rounded-xl" />
+              <ProductCover cover={p.cover_path} art={p.art} title={p.title} className="aspect-[4/3] rounded-xl" />
               <div>
                 <Link href={`/products/${p.slug}`} className="font-display text-xl hover:underline">{p.title}</Link>
                 <p className="mt-1 text-xs text-ink-soft">by {sellerName(p)} · {formatINR(p.price_paise)}</p>

@@ -1,12 +1,13 @@
 import { saveProduct } from "@/app/actions";
 import { launchSettings } from "@/lib/site";
 import type { Product } from "@/lib/types";
-import { SubmitButton } from "./client-bits";
+import { coverUrl } from "@/lib/media";
+import { CoverPicker, SubmitButton } from "./client-bits";
 import { ProductArt } from "./product-card";
 import { Card, Field, buttonClass, inputClass, textareaClass } from "./ui";
 
 // One form for both "new product" and "edit product".
-export function ProductForm({ product, hubs }: { product?: Product; hubs: { id: string; name: string }[] }) {
+export function ProductForm({ product, hubs, userId }: { product?: Product; hubs: { id: string; name: string }[]; userId: string }) {
   return (
     <form action={saveProduct} className="space-y-6">
       {product ? <input type="hidden" name="id" value={product.id} /> : null}
@@ -41,8 +42,16 @@ export function ProductForm({ product, hubs }: { product?: Product; hubs: { id: 
         <Field label="Licence" hint="What the buyer may and may not do with the files.">
           <textarea name="license_text" rows={2} maxLength={2000} defaultValue={product?.license_text ?? "Single-user commercial licence. Do not resell or share the files."} className={textareaClass} />
         </Field>
+        <div>
+          <p className="text-sm font-medium">Cover image</p>
+          <p className="mt-1 text-xs text-ink-soft">The picture buyers and influencers see on cards and on your product page.</p>
+          <div className="mt-3">
+            <CoverPicker userId={userId} currentPath={product?.cover_path} currentUrl={coverUrl(product?.cover_path)} />
+          </div>
+        </div>
         <fieldset>
           <legend className="text-sm font-medium">Cover style</legend>
+          <p className="mt-1 text-xs text-ink-soft">Shown instead when you have not uploaded a cover image.</p>
           <div className="mt-3 grid grid-cols-4 gap-3">
             {[0, 1, 2, 3].map((n) => (
               <label key={n} className="cursor-pointer">

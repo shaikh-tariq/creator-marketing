@@ -47,6 +47,7 @@ const productSchema = z.object({
   brief_text: z.string().max(2000),
   license_text: z.string().max(2000),
   art: z.coerce.number().int().min(0).max(3),
+  cover_path: z.string().max(300).default(""),
 });
 
 export async function saveProduct(fd: FormData) {
@@ -56,9 +57,11 @@ export async function saveProduct(fd: FormData) {
 
   const parsed = productSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) back(here, "error", parsed.error.issues[0].message);
-  const { price, ...rest } = parsed.data;
+  const { price, cover_path, ...rest } = parsed.data;
   const row = {
     ...rest,
+    // The cover image must be in this seller's own folder (the database enforces this too).
+    cover_path: cover_path && cover_path.startsWith(`${user.id}/`) ? cover_path : null,
     price_paise: Math.round(price * 100),
     includes: str(fd, "includes")
       .split("\n")
@@ -68,8 +71,13 @@ export async function saveProduct(fd: FormData) {
   };
 
   if (id) {
+    const { data: before } = await supabase.from("products").select("cover_path").eq("id", id).maybeSingle();
     const { error } = await supabase.from("products").update(row).eq("id", id);
     if (error) back(here, "error", error.message);
+    // A replaced or removed cover image is deleted from storage so old files do not pile up.
+    if (before?.cover_path && before.cover_path !== row.cover_path) {
+      await supabase.storage.from("product-covers").remove([before.cover_path]);
+    }
     back(here, "ok", "Changes saved");
   }
   const { data, error } = await supabase

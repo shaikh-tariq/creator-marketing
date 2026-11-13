@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { placeOrder } from "@/app/actions";
 import { SubmitButton } from "@/components/client-bits";
-import { ProductArt, sellerName } from "@/components/product-card";
+import { ProductCover, sellerName } from "@/components/product-card";
 import { ButtonLink, Container, Notice, buttonClass, inputClass } from "@/components/ui";
 import { getProfile } from "@/lib/auth";
 import { getProductBySlug } from "@/lib/data";
@@ -50,7 +50,7 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
 
       <div className="mt-8 grid gap-8 md:grid-cols-[1fr_1fr]">
         <div className="flex gap-4 rounded-2xl border border-line bg-card p-5 md:flex-col">
-          <ProductArt art={product.art} className="aspect-[4/3] w-28 shrink-0 rounded-xl md:w-full" />
+          <ProductCover cover={product.cover_path} art={product.art} title={product.title} className="aspect-[4/3] w-28 shrink-0 rounded-xl md:w-full" />
           <div>
             <h2 className="text-2xl leading-snug">{product.title}</h2>
             <p className="mt-1 text-sm text-ink-soft">by {sellerName(product)}</p>

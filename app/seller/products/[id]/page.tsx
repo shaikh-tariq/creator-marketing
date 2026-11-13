@@ -101,7 +101,7 @@ export default async function EditProduct({ params, searchParams }: Props) {
         <div className="mt-4"><FileUploader productId={p.id} userId={profile.id} /></div>
       </Card>
 
-      <ProductForm product={p} hubs={hubs ?? []} />
+      <ProductForm product={p} hubs={hubs ?? []} userId={profile.id} />
     </>
   );
 }
