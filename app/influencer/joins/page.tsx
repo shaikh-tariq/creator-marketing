@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { setImpressions, submitContent } from "@/app/actions";
+import { publishPost, resubmitContent, setImpressions, submitContent } from "@/app/actions";
 import { CopyText, PostImagePicker, SubmitButton } from "@/components/client-bits";
+import { PlatformIcon } from "@/components/platform-icon";
 import { ButtonLink, Card, Empty, Field, Flash, Notice, PageTitle, StatusBadge, buttonClass, inputClass, smallButton, textareaClass } from "@/components/ui";
 import { requireRole } from "@/lib/auth";
 import { postImageUrl, shortDate, siteOrigin } from "@/lib/data";
@@ -23,6 +24,16 @@ function Stat({ label, value, hint }: { label: string; value: string; hint?: str
   );
 }
 
+function PlatformSelect({ defaultValue }: { defaultValue?: string }) {
+  return (
+    <select name="platform" required defaultValue={defaultValue} className={inputClass}>
+      {platforms.map((p) => (
+        <option key={p.id} value={p.id}>{p.name}</option>
+      ))}
+    </select>
+  );
+}
+
 export default async function MyJoins({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
   const flash = await searchParams;
   const profile = await requireRole(["influencer"]);
@@ -39,7 +50,6 @@ export default async function MyJoins({ searchParams }: { searchParams: Promise<
   const subs = subsRes.data ?? [];
   const links = Object.fromEntries((linksRes.data ?? []).map((l) => [l.join_id, l]));
 
-  // Sales and earnings per tracked link
   const sales: Record<string, { count: number; earned: number }> = {};
   for (const o of ordersRes.data ?? []) {
     if (!o.tracking_link_id) continue;
@@ -51,7 +61,16 @@ export default async function MyJoins({ searchParams }: { searchParams: Promise<
   return (
     <>
       <Flash params={flash} />
-      <PageTitle title="My posts" intro="Each product you promote, the posts you made for it, and how they are doing." />
+      <PageTitle title="My posts" intro="Send a draft first. Post it only after the seller approves, then add the live link here." />
+
+      <ol className="mb-8 grid gap-3 text-sm sm:grid-cols-4">
+        {["Send a draft", "Seller approves", "You post it with your code", "Add the live link"].map((t, i) => (
+          <li key={t} className="flex items-center gap-3 rounded-2xl border border-line bg-card px-4 py-3">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-paper-deep font-display text-sm font-semibold text-accent-deep">{i + 1}</span>
+            {t}
+          </li>
+        ))}
+      </ol>
 
       {joins.length === 0 ? (
         <Empty title="You have not joined a product yet" text="Browse what is live and join something you would recommend.">
@@ -64,7 +83,7 @@ export default async function MyJoins({ searchParams }: { searchParams: Promise<
             const mine = subs.filter((s) => s.join_id === j.id);
             const link = links[j.id];
             const sold = link ? sales[link.id] ?? { count: 0, earned: 0 } : { count: 0, earned: 0 };
-            const waiting = mine.some((s) => s.status === "pending");
+            const inReview = mine.some((s) => s.status === "pending" || s.status === "changes_requested");
             return (
               <Card key={j.id} className="p-0 sm:p-0">
                 <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line p-5 sm:p-6">
@@ -76,7 +95,7 @@ export default async function MyJoins({ searchParams }: { searchParams: Promise<
                 </div>
 
                 <div className="space-y-5 p-5 sm:p-6">
-                  {j.status === "applied" ? <Notice>The seller is reviewing your request. You can submit a post once they accept.</Notice> : null}
+                  {j.status === "applied" ? <Notice>The seller is looking at your profile. You can send a draft once they accept.</Notice> : null}
                   {j.status === "rejected" ? <Notice>The seller declined this request.</Notice> : null}
                   {j.status === "paused" ? <Notice>The seller paused you on this product. Your link and code are switched off.</Notice> : null}
 
@@ -88,7 +107,7 @@ export default async function MyJoins({ searchParams }: { searchParams: Promise<
                         <CopyText text={link.promo_code} />
                       </div>
                       <p className="mt-3 text-xs text-ink-soft">
-                        You earn {Number(link.commission_pct)}% per sale
+                        Put these in your post. You earn {Number(link.commission_pct)}% per sale
                         {Number(link.discount_pct) > 0 ? ` · the code gives buyers ${Number(link.discount_pct)}% off` : " · the seller has not added a buyer discount"}
                       </p>
                     </div>
@@ -99,29 +118,69 @@ export default async function MyJoins({ searchParams }: { searchParams: Promise<
                       {mine.map((s) => {
                         const img = postImageUrl(s.image_path);
                         const approved = s.status === "approved";
+                        const live = approved && Boolean(s.content_url);
                         return (
-                          <li key={s.id} className="lift flex flex-col overflow-hidden rounded-2xl border border-line bg-card">
-                            <a href={s.content_url} target="_blank" rel="noopener noreferrer" className="relative block aspect-[4/5] bg-paper-deep">
+                          <li key={s.id} className="flex flex-col overflow-hidden rounded-2xl border border-line bg-card">
+                            <div className="relative aspect-[4/5] bg-paper-deep">
                               {img ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img src={img} alt={`Your ${platformName(s.platform)} post`} className="size-full object-cover" />
                               ) : (
-                                <span className="flex size-full flex-col items-center justify-center gap-2 p-6 text-center text-sm text-ink-soft">
-                                  <span className="font-display text-2xl text-ink">{platformName(s.platform)}</span>
+                                <span className="flex size-full flex-col items-center justify-center gap-3 p-6 text-center text-sm text-ink-soft">
+                                  <PlatformIcon id={s.platform} size={56} />
                                   No screenshot added
                                 </span>
                               )}
-                              <span className="absolute left-3 top-3 rounded-full bg-ink/85 px-3 py-1 text-xs font-medium text-white">{platformName(s.platform)} ↗</span>
-                              <span className="absolute right-3 top-3"><StatusBadge status={s.status} /></span>
-                            </a>
+                              <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-card/95 py-1 pl-1 pr-3 text-xs font-medium shadow-sm">
+                                <PlatformIcon id={s.platform} size={22} />
+                                {platformName(s.platform)}
+                              </span>
+                              <span className="absolute right-3 top-3">
+                                {live ? <span className="rounded-full bg-success px-2.5 py-0.5 text-xs font-medium text-white">Live</span> : <StatusBadge status={s.status} />}
+                              </span>
+                            </div>
+
                             <div className="flex flex-1 flex-col p-4">
-                              <p className="text-xs text-ink-soft">Submitted {shortDate(s.created_at)}</p>
+                              <p className="text-xs text-ink-soft">Sent {shortDate(s.created_at)}</p>
                               {s.caption ? <p className="mt-2 line-clamp-3 text-sm leading-relaxed">{s.caption}</p> : null}
                               {s.seller_note ? <p className="mt-2 rounded-lg bg-paper px-3 py-2 text-sm text-ink-soft"><span className="font-medium text-ink">Seller:</span> {s.seller_note}</p> : null}
 
-                              {approved ? (
+                              {s.status === "pending" ? <p className="mt-4 text-xs text-ink-soft">Waiting for the seller. Do not post it yet.</p> : null}
+                              {s.status === "rejected" ? <p className="mt-4 text-xs text-ink-soft">The seller rejected this draft. You can send a new one.</p> : null}
+
+                              {/* Seller asked for changes: edit this same draft */}
+                              {s.status === "changes_requested" ? (
+                                <details className="mt-4 rounded-xl border border-accent/40 bg-paper-deep p-3" open>
+                                  <summary className="cursor-pointer text-sm font-semibold text-accent-deep">Edit this draft</summary>
+                                  <form action={resubmitContent} className="mt-3 space-y-3">
+                                    <input type="hidden" name="submission_id" value={s.id} />
+                                    <PostImagePicker userId={profile.id} />
+                                    <Field label="Platform"><PlatformSelect defaultValue={s.platform} /></Field>
+                                    <Field label="Caption">
+                                      <textarea name="caption" rows={4} maxLength={2000} defaultValue={s.caption} className={textareaClass} />
+                                    </Field>
+                                    <SubmitButton className={smallButton("accent", "min-h-10 w-full text-sm")}>Send updated draft</SubmitButton>
+                                  </form>
+                                </details>
+                              ) : null}
+
+                              {/* Approved but not posted yet: the extra publish step */}
+                              {approved && !live ? (
+                                <div className="mt-4 rounded-xl border border-success/40 bg-success/10 p-3">
+                                  <p className="text-sm font-semibold text-success">Approved. You can post it now.</p>
+                                  <p className="mt-1 text-xs leading-relaxed text-ink-soft">Post it on {platformName(s.platform)} with your link or code, then paste the link to the live post here.</p>
+                                  <form action={publishPost} className="mt-3 space-y-2">
+                                    <input type="hidden" name="submission_id" value={s.id} />
+                                    <input name="content_url" type="url" required placeholder="https:// link to your live post" aria-label="Link to your live post" className={`${inputClass} mt-0 h-10 text-sm`} />
+                                    <SubmitButton className={smallButton("primary", "min-h-10 w-full text-sm")}>Publish</SubmitButton>
+                                  </form>
+                                </div>
+                              ) : null}
+
+                              {live ? (
                                 <>
-                                  <dl className="mt-4 grid grid-cols-2 gap-2">
+                                  <a href={s.content_url!} target="_blank" rel="noopener noreferrer" className="mt-3 text-sm underline">Open the live post ↗</a>
+                                  <dl className="mt-3 grid grid-cols-2 gap-2">
                                     <Stat label="Impressions" value={s.impressions != null ? s.impressions.toLocaleString("en-IN") : "–"} hint="You entered" />
                                     <Stat label="Link clicks" value={String(link?.clicks ?? 0)} hint="Tracked" />
                                     <Stat label="Sold" value={String(sold.count)} hint="Tracked" />
@@ -133,9 +192,7 @@ export default async function MyJoins({ searchParams }: { searchParams: Promise<
                                     <SubmitButton className={smallButton("outline", "shrink-0")}>Save</SubmitButton>
                                   </form>
                                 </>
-                              ) : (
-                                <p className="mt-4 text-xs text-ink-soft">Stats appear once the seller approves this post.</p>
-                              )}
+                              ) : null}
                             </div>
                           </li>
                         );
@@ -143,37 +200,24 @@ export default async function MyJoins({ searchParams }: { searchParams: Promise<
                     </ul>
                   ) : null}
 
-                  {mine.filter((s) => s.status === "approved").length > 1 ? (
-                    <p className="text-xs text-ink-soft">Clicks, sales and earnings are counted per product link, so posts for the same product show the same tracked numbers.</p>
-                  ) : null}
-
-                  {j.status === "active" && !waiting ? (
+                  {j.status === "active" && !inReview ? (
                     <details open={mine.length === 0} className="rounded-2xl border border-line p-4">
-                      <summary className="cursor-pointer text-sm font-medium">{mine.length === 0 ? "Submit your post" : "Submit another post"}</summary>
+                      <summary className="cursor-pointer text-sm font-medium">{mine.length === 0 ? "Send your first draft" : "Send another draft"}</summary>
                       {product.brief_text ? <p className="mt-3 rounded-xl bg-paper p-4 text-sm leading-relaxed"><span className="font-medium">Brief:</span> {product.brief_text}</p> : null}
                       <form action={submitContent} className="mt-4 space-y-4">
                         <input type="hidden" name="join_id" value={j.id} />
                         <PostImagePicker userId={profile.id} />
-                        <div className="grid gap-4 sm:grid-cols-[12rem_1fr]">
-                          <Field label="Platform">
-                            <select name="platform" required className={inputClass}>
-                              {platforms.map((p) => (
-                                <option key={p.id} value={p.id}>{p.name}</option>
-                              ))}
-                            </select>
-                          </Field>
-                          <Field label="Link to your post or draft">
-                            <input name="content_url" type="url" required placeholder="https://" className={inputClass} />
-                          </Field>
+                        <div className="max-w-xs">
+                          <Field label="Where will you post it?"><PlatformSelect /></Field>
                         </div>
-                        <Field label="Caption">
-                          <textarea name="caption" rows={3} maxLength={2000} className={textareaClass} />
+                        <Field label="Caption" hint="Write it as you plan to post it. No link is needed yet; you post only after the seller approves.">
+                          <textarea name="caption" rows={4} maxLength={2000} className={textareaClass} />
                         </Field>
                         <label className="flex items-start gap-3 text-sm leading-relaxed text-ink-soft">
                           <input type="checkbox" name="disclosure" required className="mt-1 size-4 accent-[#0f172a]" />
-                          <span>My post is clearly marked as a paid partnership (for example #ad or the platform&apos;s paid-partnership label).</span>
+                          <span>I will mark the post as a paid partnership (for example #ad or the platform&apos;s paid-partnership label).</span>
                         </label>
-                        <SubmitButton className={buttonClass("accent")}>Submit for approval</SubmitButton>
+                        <SubmitButton className={buttonClass("accent")}>Send draft for approval</SubmitButton>
                       </form>
                     </details>
                   ) : null}

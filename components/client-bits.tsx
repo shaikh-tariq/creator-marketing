@@ -2,7 +2,7 @@
 
 import Link, { useLinkStatus } from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 
@@ -267,5 +267,101 @@ export function Reveal({ children, className = "", delay = 0 }: { children: Reac
     <div ref={ref} className={`reveal ${shown ? "reveal-in" : ""} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
       {children}
     </div>
+  );
+}
+
+// Promo code box at checkout. The code is applied automatically a moment after typing stops.
+export function PromoInput({ initial, applied, error }: { initial: string; applied?: string; error?: string }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [value, setValue] = useState(initial);
+  const [pending, startTransition] = useTransition();
+
+  useEffect(() => {
+    const code = value.trim().toUpperCase();
+    if (code === initial.trim().toUpperCase()) return;
+    const timer = setTimeout(() => {
+      startTransition(() => router.replace(code ? `${pathname}?code=${encodeURIComponent(code)}` : pathname, { scroll: false }));
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [value, initial, pathname, router]);
+
+  return (
+    <div>
+      <label className="block text-sm font-medium">
+        Promo code
+        <span className="relative mt-2 block">
+          <input
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="Have a creator's code? Type it here"
+            autoComplete="off"
+            className="block h-12 w-full rounded-xl border border-line bg-card px-4 pr-10 text-sm font-normal uppercase outline-none transition-colors placeholder:normal-case focus:border-accent"
+          />
+          {pending ? <span className="absolute right-3 top-1/2 -translate-y-1/2 text-accent"><Spinner /></span> : null}
+        </span>
+      </label>
+      {!pending && applied ? <p className="mt-2 flex items-center gap-2 text-sm font-medium text-success"><span className="flex size-5 items-center justify-center rounded-full bg-success text-[11px] text-white">✓</span>{applied}</p> : null}
+      {!pending && error ? <p className="mt-2 text-sm text-alert">{error}</p> : null}
+    </div>
+  );
+}
+
+// Upload or change a profile picture.
+export function AvatarUploader({ userId, current }: { userId: string; current: string | null }) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [url, setUrl] = useState(current);
+
+  async function onChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError("");
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) return setError("Use a PNG, JPG or WebP image.");
+    if (file.size > 2 * 1024 * 1024) return setError("The image is over 2 MB.");
+    setBusy(true);
+    const supabase = createClient();
+    const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+    const path = `${userId}/${Date.now()}.${ext}`;
+    const upload = await supabase.storage.from("avatars").upload(path, file);
+    if (upload.error) {
+      setBusy(false);
+      return setError(upload.error.message);
+    }
+    const publicUrl = supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl;
+    const save = await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("id", userId);
+    setBusy(false);
+    if (save.error) return setError(save.error.message);
+    setUrl(publicUrl);
+    router.refresh();
+  }
+
+  return (
+    <div className="flex items-center gap-5">
+      {url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={url} alt="Your profile picture" className="size-20 rounded-full object-cover" />
+      ) : (
+        <span className="flex size-20 items-center justify-center rounded-full bg-paper-deep text-2xl text-accent-deep">＋</span>
+      )}
+      <div>
+        <label className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full border border-line bg-card px-5 text-sm font-medium shadow-sm transition-all hover:border-ink/40 active:scale-[0.97]">
+          {busy ? <Spinner /> : null}
+          {url ? "Change picture" : "Upload a picture"}
+          <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={onChange} disabled={busy} />
+        </label>
+        <p className="mt-2 text-xs text-ink-soft">PNG or JPG, up to 2 MB. Square images look best.</p>
+        {error ? <p className="mt-1 text-sm text-alert">{error}</p> : null}
+      </div>
+    </div>
+  );
+}
+
+export function PrintButton({ className, children }: { className: string; children: React.ReactNode }) {
+  return (
+    <button type="button" onClick={() => window.print()} className={className}>
+      {children}
+    </button>
   );
 }

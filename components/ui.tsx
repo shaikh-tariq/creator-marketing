@@ -200,3 +200,16 @@ export function Table({ head, rows }: { head: string[]; rows: React.ReactNode[][
     </div>
   );
 }
+
+// Round profile picture, or the person's initial when they have not uploaded one.
+export function Avatar({ url, name, size = 40 }: { url?: string | null; name?: string | null; size?: number }) {
+  const initial = (name ?? "?").trim().charAt(0).toUpperCase() || "?";
+  return url ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={url} alt="" width={size} height={size} className="shrink-0 rounded-full object-cover" style={{ width: size, height: size }} />
+  ) : (
+    <span aria-hidden className="flex shrink-0 items-center justify-center rounded-full bg-paper-deep font-semibold text-accent-deep" style={{ width: size, height: size, fontSize: size * 0.42 }}>
+      {initial}
+    </span>
+  );
+}

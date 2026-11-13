@@ -11,7 +11,7 @@ export default async function SellerProfile({ searchParams }: { searchParams: Pr
   const flash = await searchParams;
   const profile = await requireRole(["seller"]);
   const supabase = await createClient();
-  const { data } = await supabase.from("seller_profiles").select("brand_name, bio").eq("user_id", profile.id).single();
+  const { data } = await supabase.from("seller_profiles").select("brand_name, bio, gstin").eq("user_id", profile.id).single();
 
   return (
     <>
@@ -24,6 +24,9 @@ export default async function SellerProfile({ searchParams }: { searchParams: Pr
           </Field>
           <Field label="About your brand" hint="A sentence or two. Up to 500 characters.">
             <textarea name="bio" rows={4} maxLength={500} defaultValue={data?.bio ?? ""} className={textareaClass} />
+          </Field>
+          <Field label="GST number (GSTIN)" hint="Optional. If you are GST-registered, add it and buyers' receipts will show the GST included in the price. Leave empty if you are not registered.">
+            <input name="gstin" maxLength={15} defaultValue={data?.gstin ?? ""} placeholder="15 characters" className={`${inputClass} uppercase`} />
           </Field>
           <Field label="Login email">
             <input value={profile.email} disabled className={`${inputClass} opacity-60`} />

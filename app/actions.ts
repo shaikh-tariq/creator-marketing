@@ -146,9 +146,11 @@ export async function saveSellerProfile(fd: FormData) {
   const { supabase, user } = await ctx();
   const brand = str(fd, "brand_name").slice(0, 60);
   if (brand.length < 2) back("/seller/profile", "error", "Enter your brand name");
+  const gstin = str(fd, "gstin").toUpperCase().replace(/\s/g, "");
+  if (gstin && !/^[0-9A-Z]{15}$/.test(gstin)) back("/seller/profile", "error", "A GST number has 15 letters and digits. Leave it empty if you are not registered.");
   const { error } = await supabase
     .from("seller_profiles")
-    .update({ brand_name: brand, bio: str(fd, "bio").slice(0, 500) })
+    .update({ brand_name: brand, bio: str(fd, "bio").slice(0, 500), gstin: gstin || null })
     .eq("user_id", user.id);
   if (error) back("/seller/profile", "error", error.message);
   back("/seller/profile", "ok", "Profile saved");
@@ -168,13 +170,33 @@ export async function submitContent(fd: FormData) {
   const { error } = await supabase.rpc("submit_content", {
     p_join: str(fd, "join_id"),
     p_platform: str(fd, "platform"),
-    p_url: str(fd, "content_url"),
     p_caption: str(fd, "caption"),
     p_disclosure: fd.get("disclosure") === "on",
     p_image: str(fd, "image_path") || null,
   });
   if (error) back("/influencer/joins", "error", error.message);
-  back("/influencer/joins", "ok", "Post submitted. The seller will review it.");
+  back("/influencer/joins", "ok", "Draft sent. The seller will review it before you post anything.");
+}
+
+// The seller asked for changes: the influencer edits the same draft and sends it back.
+export async function resubmitContent(fd: FormData) {
+  const { supabase } = await ctx();
+  const { error } = await supabase.rpc("resubmit_content", {
+    p_submission: str(fd, "submission_id"),
+    p_platform: str(fd, "platform"),
+    p_caption: str(fd, "caption"),
+    p_image: str(fd, "image_path") || null,
+  });
+  if (error) back("/influencer/joins", "error", error.message);
+  back("/influencer/joins", "ok", "Updated draft sent back to the seller.");
+}
+
+// The post is approved and now live: the influencer adds the link to it.
+export async function publishPost(fd: FormData) {
+  const { supabase } = await ctx();
+  const { error } = await supabase.rpc("publish_post", { p_submission: str(fd, "submission_id"), p_url: str(fd, "content_url") });
+  if (error) back("/influencer/joins", "error", error.message);
+  back("/influencer/joins", "ok", "Post marked as live. Clicks and sales will show on its card.");
 }
 
 export async function setImpressions(fd: FormData) {
@@ -289,6 +311,27 @@ export async function adminSetUser(fd: FormData) {
   back(here, "ok", status === "active" ? "Account is active" : "Account suspended");
 }
 
+export async function adminBanUser(fd: FormData) {
+  const { supabase } = await ctx();
+  const { error } = await supabase.rpc("admin_ban_user", { p_user: str(fd, "user_id"), p_reason: str(fd, "reason") });
+  if (error) back("/admin/users", "error", error.message);
+  back("/admin/users", "ok", "Account banned. That email address cannot log in or sign up again.");
+}
+
+export async function adminUnban(fd: FormData) {
+  const { supabase } = await ctx();
+  const { error } = await supabase.rpc("admin_unban_email", { p_email: str(fd, "email") });
+  if (error) back("/admin/users", "error", error.message);
+  back("/admin/users", "ok", "Ban lifted. If the account still exists, reactivate it from the list.");
+}
+
+export async function adminDeleteUser(fd: FormData) {
+  const { supabase } = await ctx();
+  const { error } = await supabase.rpc("admin_delete_user", { p_user: str(fd, "user_id") });
+  if (error) back("/admin/users", "error", error.message);
+  back("/admin/users", "ok", "Account deleted. The same email can sign up again as a new account.");
+}
+
 export async function adminRefund(fd: FormData) {
   const { supabase } = await ctx();
   const { error } = await supabase.rpc("admin_refund_order", { p_order: str(fd, "order_id"), p_reason: str(fd, "reason") });
@@ -315,4 +358,26 @@ export async function adminSaveSettings(fd: FormData) {
   const { error } = await supabase.from("settings").upsert(rows, { onConflict: "key" });
   if (error) back("/admin/settings", "error", error.message);
   back("/admin/settings", "ok", "Settings saved. They apply to new orders only.");
+}
+
+// ---------------- Account (every role) ----------------
+
+export async function saveAccount(fd: FormData) {
+  const { supabase, user } = await ctx();
+  const name = str(fd, "full_name").slice(0, 80);
+  if (name.length < 2) back("/account", "error", "Enter your name");
+  const { error } = await supabase.from("profiles").update({ full_name: name, phone: str(fd, "phone").slice(0, 20) || null }).eq("id", user.id);
+  if (error) back("/account", "error", error.message);
+  revalidatePath("/", "layout");
+  back("/account", "ok", "Profile saved");
+}
+
+export async function changePassword(fd: FormData) {
+  const { supabase } = await ctx();
+  const password = String(fd.get("password") ?? "");
+  if (password.length < 8) back("/account", "error", "Password needs at least 8 characters");
+  if (password !== String(fd.get("confirm") ?? "")) back("/account", "error", "The two passwords do not match");
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) back("/account", "error", error.message);
+  back("/account", "ok", "Password changed");
 }

@@ -3,7 +3,7 @@ import { signOut } from "@/app/(auth)/actions";
 import { roleHome, type Profile, type Role } from "@/lib/auth";
 import { liveHubs, site } from "@/lib/site";
 import { NavLink, SubmitButton } from "./client-bits";
-import { buttonClass, Container } from "./ui";
+import { Avatar, buttonClass, Container } from "./ui";
 
 type Item = { href: string; label: string; exact?: boolean };
 
@@ -22,7 +22,6 @@ const roleNav: Record<Role, Item[]> = {
     { href: "/seller/products", label: "Products" },
     { href: "/seller/submissions", label: "Influencers" },
     { href: "/seller/earnings", label: "Earnings" },
-    { href: "/seller/profile", label: "Brand profile" },
     { href: "/search", label: "Marketplace" },
   ],
   influencer: [
@@ -30,7 +29,6 @@ const roleNav: Record<Role, Item[]> = {
     { href: "/influencer/browse", label: "Find products" },
     { href: "/influencer/joins", label: "My posts" },
     { href: "/influencer/earnings", label: "Earnings" },
-    { href: "/influencer/channels", label: "Profile & channels" },
   ],
   admin: [
     { href: "/admin", label: "Overview", exact: true },
@@ -61,7 +59,6 @@ export function SiteHeader({ profile }: { profile: Profile | null }) {
   const nav = profile ? roleNav[profile.role] : guestNav;
   const tag = profile ? roleTag[profile.role] : null;
   const first = profile?.full_name?.split(" ")[0] ?? "Account";
-  const initial = first.charAt(0).toUpperCase();
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-card/85 backdrop-blur-md">
@@ -85,10 +82,10 @@ export function SiteHeader({ profile }: { profile: Profile | null }) {
           {profile ? (
             <>
               {profile.role === "admin" ? <NavLink href="/library">My library</NavLink> : null}
-              <span className="flex max-w-36 items-center gap-2 rounded-full border border-line bg-card py-1 pl-1 pr-3 shadow-sm">
-                <span className="flex size-7 items-center justify-center rounded-full bg-paper-deep text-xs font-semibold text-accent-deep">{initial}</span>
+              <Link href="/account" title="Profile and settings" className="flex max-w-40 items-center gap-2 rounded-full border border-line bg-card py-1 pl-1 pr-3 shadow-sm transition-all hover:border-ink/40 active:scale-[0.97]">
+                <Avatar url={profile.avatar_url} name={first} size={28} />
                 <span className="truncate">{first}</span>
-              </span>
+              </Link>
               <form action={signOut}>
                 <SubmitButton className="inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-ink-soft transition-all hover:bg-paper-deep hover:text-ink active:scale-[0.97]">Log out</SubmitButton>
               </form>
@@ -117,7 +114,7 @@ export function SiteHeader({ profile }: { profile: Profile | null }) {
           <div className="absolute inset-x-0 top-16 border-b border-line bg-card px-5 pb-6 pt-2 shadow-lg">
             {tag ? <p className="pt-3 text-xs text-ink-soft">Logged in as {first} · {tag.label}</p> : null}
             <nav aria-label="Mobile" className="flex flex-col">
-              {[...nav, ...(profile ? [] : [{ href: "/signup?role=buyer", label: "Join to buy" }, { href: "/signup?role=seller", label: "Join to sell" }, { href: "/signup?role=influencer", label: "Join to promote" }, { href: "/search", label: "Browse products" }, { href: "/login", label: "Log in" }])].map((l) => (
+              {[...nav, ...(profile ? [{ href: "/account", label: "Profile & settings" }] : [{ href: "/signup?role=buyer", label: "Join to buy" }, { href: "/signup?role=seller", label: "Join to sell" }, { href: "/signup?role=influencer", label: "Join to promote" }, { href: "/search", label: "Browse products" }, { href: "/login", label: "Log in" }])].map((l) => (
                 <Link key={l.href} href={l.href} className="border-b border-line py-4 font-display text-xl active:bg-paper-deep">
                   {l.label}
                 </Link>

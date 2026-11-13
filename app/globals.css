@@ -184,3 +184,17 @@ h2 em {
 body:has(.auth-shell) > footer {
   display: none;
 }
+
+/* Printing a receipt: only the receipt itself, no menus or footer. */
+@media print {
+  body > header,
+  body > footer {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  .page-enter {
+    animation: none;
+  }
+}

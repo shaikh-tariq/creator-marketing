@@ -11,6 +11,7 @@ export type Profile = {
   full_name: string | null;
   email: string;
   status: "pending" | "active" | "suspended";
+  avatar_url: string | null;
 };
 
 export const roleHome: Record<Role, string> = {
@@ -30,7 +31,7 @@ export const getProfile = cache(async (): Promise<Profile | null> => {
   if (!userId) return null;
   const { data } = await supabase
     .from("profiles")
-    .select("id, role, full_name, email, status")
+    .select("id, role, full_name, email, status, avatar_url")
     .eq("id", userId)
     .single();
   return (data as Profile | null) ?? null;

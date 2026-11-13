@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { sendSignupCode, verifySignupCode } from "@/app/(auth)/actions";
+import { isVerified, sendSignupCode, verifySignupCode } from "@/app/(auth)/actions";
 import { PasswordForm } from "./auth-forms";
 import { Spinner } from "./client-bits";
 import { PlatformIcon } from "./platform-icon";
@@ -46,19 +46,20 @@ const chip = (on: boolean) =>
     on ? "border-accent bg-accent text-white shadow-sm" : "border-line bg-card text-ink hover:border-ink/40"
   }`;
 
-export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
+export function SignupWizard({ defaultRole, verified }: { defaultRole?: string; verified?: { name: string; email: string } }) {
   const [role, setRole] = useState<Role | "">(roleCards.some((r) => r.id === defaultRole) ? (defaultRole as Role) : "");
-  const [name, setName] = useState("");
+  const [name, setName] = useState(verified?.name ?? "");
   const [brand, setBrand] = useState("");
   const [platforms, setPlatforms] = useState<string[]>([]);
   const [handles, setHandles] = useState<Record<string, string>>({});
   const [niche, setNiche] = useState<string[]>([]);
   const [range, setRange] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(verified?.email ?? "");
   const [code, setCode] = useState("");
   const [notice, setNotice] = useState("");
   const [consent, setConsent] = useState(false);
-  const [index, setIndex] = useState(defaultRole && roleCards.some((r) => r.id === defaultRole) ? 1 : 0);
+  // 99 means "the last step": used when the person returns from the email link already verified.
+  const [index, setIndex] = useState(verified ? 99 : defaultRole && roleCards.some((r) => r.id === defaultRole) ? 1 : 0);
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
 
@@ -141,6 +142,16 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
     });
   }
 
+  // While waiting on the "check your email" step, notice when the link is clicked (even in another tab)
+  // and move this page on to the password step by itself.
+  useEffect(() => {
+    if (current !== "code") return;
+    const timer = setInterval(async () => {
+      if (await isVerified()) setIndex((i) => i + 1);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [current]);
+
   // Enter moves forward, like pressing Continue.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -154,7 +165,7 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
   });
 
   const groups = [...new Set(steps.map((s) => s.group))];
-  const currentIndex = index;
+  const currentIndex = Math.min(index, steps.length - 1);
 
   return (
     <div className="auth-shell grid min-h-[calc(100vh-4rem)] lg:grid-cols-[17rem_1fr]">
@@ -365,7 +376,7 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
 
           {current !== "password" ? (
             <div className="mt-10 flex items-center justify-between gap-4">
-              {index > 0 ? (
+              {index > 0 && index < 99 ? (
                 <button type="button" onClick={back} className="cursor-pointer rounded-full px-3 py-2 text-sm text-ink-soft transition-colors hover:bg-paper-deep hover:text-ink">← Back</button>
               ) : (
                 <Link href="/login" className="text-sm text-ink-soft underline">I already have an account</Link>

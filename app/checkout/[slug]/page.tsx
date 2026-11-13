@@ -3,9 +3,9 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { placeOrder } from "@/app/actions";
-import { SubmitButton } from "@/components/client-bits";
+import { PromoInput, SubmitButton } from "@/components/client-bits";
 import { ProductCover, sellerName } from "@/components/product-card";
-import { ButtonLink, Container, Notice, buttonClass, inputClass } from "@/components/ui";
+import { ButtonLink, Container, Notice, buttonClass } from "@/components/ui";
 import { getProfile } from "@/lib/auth";
 import { getProductBySlug } from "@/lib/data";
 import { formatINR } from "@/lib/money";
@@ -44,8 +44,6 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
           flow can be tested before a payment gateway is connected.
         </Notice>
         {error ? <Notice tone="alert">{error}</Notice> : null}
-        {quote.code_error ? <Notice tone="alert">{quote.code_error}</Notice> : null}
-        {codeApplied ? <Notice tone="success">Code {quote.promo_code} applied: {Number(quote.discount_pct)}% off.</Notice> : null}
       </div>
 
       <div className="mt-8 grid gap-8 md:grid-cols-[1fr_1fr]">
@@ -59,10 +57,11 @@ export default async function CheckoutPage({ params, searchParams }: Props) {
         </div>
 
         <div>
-          <form className="flex gap-2">
-            <input name="code" defaultValue={code} placeholder="Promo code" aria-label="Promo code" className={`${inputClass} mt-0 uppercase`} />
-            <button className={buttonClass("outline", "shrink-0")}>Apply</button>
-          </form>
+          <PromoInput
+            initial={code}
+            applied={codeApplied ? `Code ${quote.promo_code} applied: ${Number(quote.discount_pct) > 0 ? `${Number(quote.discount_pct)}% off, you save ${formatINR(quote.discount_paise)}` : "the creator is credited (this seller offers no buyer discount)"}` : undefined}
+            error={quote.code_error ?? undefined}
+          />
 
           <dl className="mt-6 divide-y divide-line rounded-2xl border border-line bg-card px-5 text-sm">
             <div className="flex justify-between py-3.5">

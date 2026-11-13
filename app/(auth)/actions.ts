@@ -53,7 +53,7 @@ export async function sendSignupCode(_prev: FormState, formData: FormData): Prom
     options: {
       shouldCreateUser: true,
       // If the person clicks the link in the email instead of typing the code, they land on the password page.
-      emailRedirectTo: `${origin}/auth/confirm?next=/set-password`,
+      emailRedirectTo: `${origin}/auth/confirm?next=${encodeURIComponent("/signup?step=password")}`,
       // The database trigger reads these to create the profile row (see the migrations).
       data: {
         full_name,
@@ -68,10 +68,19 @@ export async function sendSignupCode(_prev: FormState, formData: FormData): Prom
   });
 
   if (error) {
+    if (/cannot be used|Database error/i.test(error.message)) return { error: "This email address cannot be used to create an account. Contact support if you think this is a mistake." };
     if (/rate limit|security purposes/i.test(error.message)) return { error: "Too many emails were requested. Please wait a minute and try again." };
     return { error: error.message };
   }
   return { success: "sent" };
+}
+
+// Used by the sign-up page to notice when the email link was clicked in another tab.
+export async function isVerified(): Promise<boolean> {
+  if (!supabaseConfigured) return false;
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  return Boolean(data?.claims?.sub);
 }
 
 // Step 2: check the code. On success the person is logged in.
