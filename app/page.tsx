@@ -1,17 +1,22 @@
-import Link from "next/link";
 import Image from "next/image";
 import { Reveal } from "@/components/client-bits";
 import { PipelineGuide } from "@/components/pipeline-guide";
-import { ProductCard } from "@/components/product-card";
 import { SplitReceipt } from "@/components/split-receipt";
-import { Badge, ButtonLink, Container, Eyebrow, SectionHeading, inputClass, buttonClass } from "@/components/ui";
-import { listProducts } from "@/lib/data";
-import { hubs, launchSettings, platforms } from "@/lib/site";
+import { ButtonLink, Container, Eyebrow, inputClass, buttonClass } from "@/components/ui";
+import { launchSettings, platforms } from "@/lib/site";
 
 
-export default async function HomePage() {
-  const featured = await listProducts({ limit: 4 });
+// The comparison table on the home page. Edit the wording here.
+const comparison = [
+  { what: "Finding promoters", before: "Cold messages, one by one", after: "They come to your listing" },
+  { what: "Agreeing the deal", before: "Negotiated with each creator", after: "One commission, set once" },
+  { what: "What you pay", before: "A fixed fee per post", after: "Only when a sale happens" },
+  { what: "Control over posts", before: "Hope they follow the brief", after: "You approve every post" },
+  { what: "Knowing what sold", before: "Screenshots and spreadsheets", after: "A link and code per creator" },
+  { what: "Paying creators", before: "Manual transfers", after: "Split on every sale" },
+];
 
+export default function HomePage() {
   return (
     <>
       {/* Hero: the main hook. Big promise, two clear buttons, and a crowd of creators underneath. */}
@@ -57,6 +62,42 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Why here: the old way of working with influencers next to this one */}
+      <Container className="pt-16 sm:pt-24">
+        <Reveal>
+          <div className="text-center">
+            <Eyebrow>Why sell here</Eyebrow>
+            <h2 className="mx-auto mt-4 max-w-3xl text-3xl leading-tight sm:text-5xl">Influencer marketing, without the chasing.</h2>
+            <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-ink-soft">
+              Working with creators usually means cold messages, one-off negotiations and paying before you know if a
+              post will sell. Here the deal is set once and you pay only when a sale happens.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-12 max-w-5xl overflow-x-auto">
+            <div className="grid min-w-[40rem] grid-cols-[1.2fr_1fr_1.1fr] items-stretch">
+              <div />
+              <div className="flex items-center justify-center px-4 pb-6 pt-8 text-center font-display text-lg font-semibold">Doing it yourself</div>
+              <div className="flex items-center justify-center rounded-t-3xl border-x-2 border-t-4 border-accent bg-paper-deep px-4 pb-6 pt-8 text-center font-display text-lg font-semibold">
+                With&nbsp;<span className="text-accent">Creator Marketing</span>
+              </div>
+              {comparison.map((row, i) => {
+                const last = i === comparison.length - 1;
+                return (
+                  <div key={row.what} className="contents">
+                    <div className="flex items-center border-t border-line py-6 pr-4 text-lg text-ink-soft">{row.what}</div>
+                    <div className="flex items-center justify-center border-t border-line px-4 py-6 text-center text-lg">{row.before}</div>
+                    <div className={`flex items-center justify-center border-x-2 border-accent bg-paper-deep px-4 py-6 text-center font-display text-lg font-semibold text-accent ${last ? "rounded-b-3xl border-b-2 pb-8" : ""}`}>
+                      {row.after}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </Reveal>
+      </Container>
+
       {/* Where the money goes */}
       <Container className="pt-16 sm:pt-24">
         <div className="grid items-center gap-10 lg:grid-cols-2">
@@ -78,40 +119,6 @@ export default async function HomePage() {
         </div>
       </Container>
 
-      <Container className="pt-16 sm:pt-24">
-        <SectionHeading
-          number="01"
-          eyebrow="Hubs"
-          title="Two hubs open first. More on the way."
-          intro="Each hub is a focused shelf with its own sellers and its own creators, so the right people find the right products."
-        />
-        <div className="mt-10 grid gap-5 sm:grid-cols-2">
-          {hubs.map((hub) => {
-            const live = hub.status === "live";
-            return (
-              <Link
-                key={hub.slug}
-                href={`/hubs/${hub.slug}`}
-                className={`group flex flex-col rounded-2xl border p-7 transition-colors ${
-                  live ? "border-ink/15 bg-card hover:border-ink/40" : "border-dashed border-line bg-transparent"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <Badge tone={live ? "success" : "neutral"}>{live ? "Open" : "Coming soon"}</Badge>
-                  <span aria-hidden className="text-ink-soft transition-transform group-hover:translate-x-1">→</span>
-                </div>
-                <h3 className={`mt-6 text-2xl sm:text-3xl ${live ? "" : "text-ink-soft"}`}>{hub.name}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-ink-soft">{hub.blurb}</p>
-                <ul className="mt-6 flex flex-wrap gap-2">
-                  {hub.examples.map((e) => (
-                    <li key={e} className="rounded-full border border-line px-3 py-1 text-xs text-ink-soft">{e}</li>
-                  ))}
-                </ul>
-              </Link>
-            );
-          })}
-        </div>
-      </Container>
 
       {/* How it works: the animated guide for sellers, influencers and buyers */}
       <Container className="pt-16 sm:pt-24">
@@ -129,24 +136,15 @@ export default async function HomePage() {
         </Reveal>
       </Container>
 
-      {featured.length > 0 ? (
-        <Container className="pt-16 sm:pt-24">
-          <SectionHeading number="03" eyebrow="On the shelf" title="New in the hubs." />
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {featured.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
-        </Container>
-      ) : null}
 
       <Container className="pt-16 sm:pt-24">
-        <SectionHeading
-          number="04"
-          eyebrow="Where creators post"
-          title="Five platforms, one dashboard."
-          intro="Promote where your audience already is. Every approved post gets its own tracked link and promo code."
-        />
+        <div className="border-t border-line pt-10 text-center">
+          <Eyebrow>Where creators post</Eyebrow>
+          <h2 className="mx-auto mt-4 max-w-2xl text-3xl leading-tight sm:text-4xl">Five platforms, one dashboard.</h2>
+          <p className="mx-auto mt-4 max-w-xl leading-relaxed text-ink-soft">
+            Promote where your audience already is. Every approved post gets its own tracked link and promo code.
+          </p>
+        </div>
         <div className="mt-10 overflow-hidden rounded-2xl border border-line">
           {platforms.map((p, i) => (
             <div

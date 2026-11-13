@@ -8,11 +8,8 @@ import { buttonClass, Container } from "./ui";
 type Item = { href: string; label: string; exact?: boolean };
 
 // Each kind of account gets its own header. Visitors see the public one.
-const guestNav: Item[] = [
-  ...liveHubs.map((h) => ({ href: `/hubs/${h.slug}`, label: h.name })),
-  { href: "/sell", label: "Sell" },
-  { href: "/promote", label: "Promote & earn" },
-];
+// Visitors get a clean header with no menu: logo on the left, log in and one button on the right.
+const guestNav: Item[] = [];
 
 const roleNav: Record<Role, Item[]> = {
   buyer: [
@@ -64,6 +61,7 @@ export function SiteHeader({ profile }: { profile: Profile | null }) {
       <Container className={`flex h-16 items-center justify-between gap-4 ${profile ? "max-w-7xl" : ""}`}>
         <div className="flex shrink-0 items-center gap-3">
           <Link href={profile ? roleHome[profile.role] : "/"} className="shrink-0 whitespace-nowrap font-display text-xl font-semibold tracking-tight transition-opacity hover:opacity-80">
+            <span className="mr-2 inline-flex size-7 -translate-y-px items-center justify-center rounded-lg bg-accent align-middle text-sm font-bold text-white">C</span>
             Creator <span className="text-accent">Marketing</span>
             <span className="sr-only"> {site.tagline}</span>
           </Link>
@@ -90,8 +88,9 @@ export function SiteHeader({ profile }: { profile: Profile | null }) {
             </>
           ) : (
             <>
+              <NavLink href="/signup?role=influencer">Join as an influencer</NavLink>
               <NavLink href="/login">Log in</NavLink>
-              <Link href="/signup" className={buttonClass("primary", "min-h-10 px-5")}>Join for free →</Link>
+              <Link href="/signup" className="inline-flex min-h-11 items-center rounded-xl bg-accent px-5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-px hover:bg-accent-deep active:scale-[0.97]">Join for free</Link>
             </>
           )}
         </div>
@@ -105,7 +104,7 @@ export function SiteHeader({ profile }: { profile: Profile | null }) {
           <div className="absolute inset-x-0 top-16 border-b border-line bg-card px-5 pb-6 pt-2 shadow-lg">
             {tag ? <p className="pt-3 text-xs text-ink-soft">Logged in as {first} · {tag.label}</p> : null}
             <nav aria-label="Mobile" className="flex flex-col">
-              {[...nav, ...(profile ? [] : [{ href: "/login", label: "Log in" }])].map((l) => (
+              {[...nav, ...(profile ? [] : [{ href: "/search", label: "Browse products" }, { href: "/signup?role=influencer", label: "Join as an influencer" }, { href: "/login", label: "Log in" }])].map((l) => (
                 <Link key={l.href} href={l.href} className="border-b border-line py-4 font-display text-xl active:bg-paper-deep">
                   {l.label}
                 </Link>
