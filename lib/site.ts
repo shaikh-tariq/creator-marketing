@@ -53,6 +53,7 @@ export const liveHubs = hubs.filter((h) => h.status === "live");
 // Where influencers can post. Link notes guide the attribution design (docs/decisions.md).
 export const platforms = [
   { id: "instagram", name: "Instagram", formats: "Reels, carousels, stories", link: "Promo code and bio link" },
+  { id: "youtube", name: "YouTube", formats: "Videos and Shorts", link: "Link in the description or pinned comment" },
   { id: "linkedin", name: "LinkedIn", formats: "Posts, carousels, video", link: "Link in the post or first comment" },
   { id: "pinterest", name: "Pinterest", formats: "Pins and idea pins", link: "Every pin links straight to the product" },
   { id: "x", name: "X", formats: "Posts and threads", link: "Link in the post" },

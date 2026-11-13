@@ -35,7 +35,7 @@ const tracks: Track[] = [
     cta: { href: "/signup?role=influencer", label: "Start promoting" },
     steps: [
       { title: "Pick a product", text: "Browse by hub and commission. Join the ones you would use yourself.", screen: { label: "Find products", rows: ["Studio Brand Kit  ·  earn 25%", "Reel Hooks Pack  ·  earn 35%", "Content Calendar  ·  earn 30%"], result: "Joined" } },
-      { title: "Make your post", text: "Follow the seller's brief on Instagram, LinkedIn, Pinterest, X or Facebook.", screen: { label: "Submit your post", rows: ["Platform  Instagram", "Link  instagram.com/reel/…", "Marked as paid partnership  ✓"], result: "Submitted" } },
+      { title: "Make your post", text: "Follow the seller's brief on Instagram, YouTube, LinkedIn, Pinterest, X or Facebook.", screen: { label: "Submit your post", rows: ["Platform  Instagram", "Link  instagram.com/reel/…", "Marked as paid partnership  ✓"], result: "Submitted" } },
       { title: "Get your link and code", text: "Once the seller approves, you receive a tracked link and your own promo code.", screen: { label: "Post approved", rows: ["Your code  AMAN10", "Your link  /r/43b32362", "Buyers get the seller's discount"], result: "Ready to share" } },
       { title: "Earn on every sale", text: "See clicks, sales and earnings for each post, all in one place.", screen: { label: "This post", rows: ["Clicks  312", "Sales  9", "Earned  ₹2,247.75"], result: "+ ₹249.75 just now" } },
     ],

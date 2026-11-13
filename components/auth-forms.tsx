@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { logIn, type FormState } from "@/app/(auth)/actions";
+import { logIn, setPassword, type FormState } from "@/app/(auth)/actions";
 import { buttonClass, Notice } from "./ui";
 
 const inputClass =
@@ -41,6 +41,28 @@ export function LogInForm({ next }: { next?: string }) {
       <Messages state={state} />
       <button type="submit" disabled={pending} className={buttonClass("primary", "h-12 w-full text-base")}>
         {pending ? "Logging in…" : "Log in"}
+      </button>
+    </form>
+  );
+}
+
+// Choose a password (typed twice). Used on the last sign-up step and on the page reached from the email link.
+export function PasswordForm() {
+  const [state, action, pending] = useActionState(setPassword, {});
+  return (
+    <form action={action} className="space-y-5">
+      <div>
+        <label htmlFor="new-password" className={labelClass}>Password</label>
+        <input id="new-password" name="password" type="password" autoComplete="new-password" minLength={8} required autoFocus className={inputClass} />
+        <p className="mt-1.5 text-xs text-ink-soft">At least 8 characters.</p>
+      </div>
+      <div>
+        <label htmlFor="confirm-password" className={labelClass}>Type it again</label>
+        <input id="confirm-password" name="confirm" type="password" autoComplete="new-password" minLength={8} required className={inputClass} />
+      </div>
+      <Messages state={state} />
+      <button type="submit" disabled={pending} className={buttonClass("primary", "h-12 w-full text-base")}>
+        {pending ? "Saving…" : "Save password and continue"}
       </button>
     </form>
   );

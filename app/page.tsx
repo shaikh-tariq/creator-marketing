@@ -140,7 +140,7 @@ export default function HomePage() {
       <Container className="pt-16 sm:pt-24">
         <div className="border-t border-line pt-10 text-center">
           <Eyebrow>Where creators post</Eyebrow>
-          <h2 className="mx-auto mt-4 max-w-2xl text-3xl leading-tight sm:text-4xl">Five platforms, one dashboard.</h2>
+          <h2 className="mx-auto mt-4 max-w-2xl text-3xl leading-tight sm:text-4xl">Six platforms, one dashboard.</h2>
           <p className="mx-auto mt-4 max-w-xl leading-relaxed text-ink-soft">
             Promote where your audience already is. Every approved post gets its own tracked link and promo code.
           </p>

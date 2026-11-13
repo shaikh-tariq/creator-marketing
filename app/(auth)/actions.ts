@@ -14,7 +14,6 @@ const notConnected =
 const signUpSchema = z.object({
   full_name: z.string().trim().min(2, "Please enter your name").max(80),
   email: z.email("Please enter a valid email"),
-  password: z.string().min(8, "Password needs at least 8 characters").max(72),
   // Admin is never selectable here. Admins are set directly in the database.
   role: z.enum(["seller", "influencer", "buyer"], "Please choose an account type"),
   consent: z.literal("on", "Please accept the terms and privacy policy"),
@@ -38,21 +37,24 @@ function parseChannels(raw: string | undefined) {
   }
 }
 
-export async function signUp(_prev: FormState, formData: FormData): Promise<FormState> {
+// Step 1 of sign-up: email the person a one-time code. The account is created now (with the details
+// from the earlier steps) but has no password and is not verified until the code is entered.
+export async function sendSignupCode(_prev: FormState, formData: FormData): Promise<FormState> {
   if (!supabaseConfigured) return { error: notConnected };
 
   const parsed = signUpSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
-  const { full_name, email, password, role, brand_name, niche, follower_range, channels } = parsed.data;
+  const { full_name, email, role, brand_name, niche, follower_range, channels } = parsed.data;
 
   const origin = (await headers()).get("origin") ?? "";
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { error } = await supabase.auth.signInWithOtp({
     email,
-    password,
     options: {
-      emailRedirectTo: `${origin}/auth/confirm`,
-      // The database trigger reads these to create the profile row (see the migration).
+      shouldCreateUser: true,
+      // If the person clicks the link in the email instead of typing the code, they land on the password page.
+      emailRedirectTo: `${origin}/auth/confirm?next=/set-password`,
+      // The database trigger reads these to create the profile row (see the migrations).
       data: {
         full_name,
         role,
@@ -65,8 +67,36 @@ export async function signUp(_prev: FormState, formData: FormData): Promise<Form
     },
   });
 
-  if (error) return { error: error.message };
-  return { success: "Almost done. Open the link we just emailed you to verify your address." };
+  if (error) {
+    if (/rate limit|security purposes/i.test(error.message)) return { error: "Too many emails were requested. Please wait a minute and try again." };
+    return { error: error.message };
+  }
+  return { success: "sent" };
+}
+
+// Step 2: check the code. On success the person is logged in.
+export async function verifySignupCode(email: string, code: string): Promise<FormState> {
+  if (!supabaseConfigured) return { error: notConnected };
+  const token = code.replace(/\D/g, "");
+  if (token.length < 6) return { error: "Enter the code from the email" };
+  const supabase = await createClient();
+  const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token, type: "email" });
+  if (error) return { error: "That code is wrong or has expired. Check the latest email, or send a new code." };
+  return { success: "verified" };
+}
+
+// Step 3: the verified, logged-in person chooses a password, then goes to their own page.
+export async function setPassword(_prev: FormState, formData: FormData): Promise<FormState> {
+  if (!supabaseConfigured) return { error: notConnected };
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+  if (password.length < 8) return { error: "Password needs at least 8 characters" };
+  if (password.length > 72) return { error: "Password is too long" };
+  if (password !== confirm) return { error: "The two passwords do not match" };
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return { error: error.message.includes("session") ? "Your session expired. Please start again." : error.message };
+  redirect("/dashboard");
 }
 
 const logInSchema = z.object({

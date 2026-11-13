@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { signUp } from "@/app/(auth)/actions";
+import { sendSignupCode, verifySignupCode } from "@/app/(auth)/actions";
+import { PasswordForm } from "./auth-forms";
 import { Spinner } from "./client-bits";
+import { PlatformIcon } from "./platform-icon";
 
 // The sign-up flow: one question per screen, a checklist on the left that fills in as you go.
 // What is asked depends on the kind of account (sellers add a brand, influencers add their channels).
 
 type Role = "seller" | "influencer" | "buyer";
-type StepId = "role" | "name" | "brand" | "platforms" | "handles" | "audience" | "account" | "done";
+type StepId = "role" | "name" | "brand" | "platforms" | "handles" | "audience" | "email" | "code" | "password";
 
 const roleCards: { id: Role; title: string; text: string }[] = [
   { id: "seller", title: "Sell my products", text: "I make templates, presets or creator tools." },
@@ -19,6 +21,7 @@ const roleCards: { id: Role; title: string; text: string }[] = [
 
 const platformList = [
   { id: "instagram", name: "Instagram", base: "https://www.instagram.com/" },
+  { id: "youtube", name: "YouTube", base: "https://www.youtube.com/@" },
   { id: "linkedin", name: "LinkedIn", base: "https://www.linkedin.com/in/" },
   { id: "pinterest", name: "Pinterest", base: "https://www.pinterest.com/" },
   { id: "x", name: "X", base: "https://x.com/" },
@@ -52,11 +55,11 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
   const [niche, setNiche] = useState<string[]>([]);
   const [range, setRange] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
+  const [notice, setNotice] = useState("");
   const [consent, setConsent] = useState(false);
   const [index, setIndex] = useState(defaultRole && roleCards.some((r) => r.id === defaultRole) ? 1 : 0);
   const [error, setError] = useState("");
-  const [finished, setFinished] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const first = name.trim().split(" ")[0];
@@ -72,13 +75,14 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
       list.push({ id: "handles", group: "Your channels", label: "Handles" });
       list.push({ id: "audience", group: "Your channels", label: "Audience" });
     }
-    list.push({ id: "account", group: "Finish", label: "Email and password" });
-    list.push({ id: "done", group: "Finish", label: "Verify your email" });
+    list.push({ id: "email", group: "Finish", label: "Your email" });
+    list.push({ id: "code", group: "Finish", label: "Verify the code" });
+    list.push({ id: "password", group: "Finish", label: "Create a password" });
     return list;
   }, [role]);
 
   const step = steps[Math.min(index, steps.length - 1)];
-  const current: StepId = finished ? "done" : step.id;
+  const current: StepId = step.id;
 
   const valid: Record<StepId, boolean> = {
     role: role !== "",
@@ -87,14 +91,17 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
     platforms: platforms.length > 0,
     handles: platforms.some((p) => (handles[p] ?? "").trim().length > 1),
     audience: range !== "",
-    account: /^\S+@\S+\.\S+$/.test(email) && password.length >= 8 && consent,
-    done: true,
+    email: /^\S+@\S+\.\S+$/.test(email) && consent,
+    code: code.replace(/\D/g, "").length >= 6,
+    password: true,
   };
 
   function next() {
     setError("");
     if (!valid[current]) return;
-    if (current === "account") return submit();
+    if (current === "email") return sendCode(true);
+    if (current === "code") return checkCode();
+    if (current === "password") return; // the password form has its own button
     setIndex((i) => Math.min(i + 1, steps.length - 1));
   }
   function back() {
@@ -102,11 +109,11 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
     setIndex((i) => Math.max(i - 1, 0));
   }
 
-  function submit() {
+  // Emails the one-time code (and creates the account with everything entered so far).
+  function sendCode(advance: boolean) {
     const fd = new FormData();
     fd.set("full_name", name.trim());
     fd.set("email", email.trim());
-    fd.set("password", password);
     fd.set("role", role);
     fd.set("consent", "on");
     fd.set("brand_name", brand.trim());
@@ -116,17 +123,28 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
       "channels",
       JSON.stringify(platforms.map((p) => ({ platform: p, url: toUrl(p, handles[p] ?? "") })).filter((c) => c.url)),
     );
+    setNotice("");
     startTransition(async () => {
-      const result = await signUp({}, fd);
-      if (result.error) setError(result.error);
-      else setFinished(true);
+      const result = await sendSignupCode({}, fd);
+      if (result.error) return setError(result.error);
+      if (advance) setIndex((i) => i + 1);
+      else setNotice("A new code is on its way.");
+    });
+  }
+
+  function checkCode() {
+    setNotice("");
+    startTransition(async () => {
+      const result = await verifySignupCode(email, code);
+      if (result.error) return setError(result.error);
+      setIndex((i) => i + 1);
     });
   }
 
   // Enter moves forward, like pressing Continue.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && !(e.target instanceof HTMLTextAreaElement)) {
+      if (e.key === "Enter" && current !== "password" && !(e.target instanceof HTMLTextAreaElement)) {
         e.preventDefault();
         next();
       }
@@ -136,7 +154,7 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
   });
 
   const groups = [...new Set(steps.map((s) => s.group))];
-  const currentIndex = finished ? steps.length - 1 : index;
+  const currentIndex = index;
 
   return (
     <div className="auth-shell grid min-h-[calc(100vh-4rem)] lg:grid-cols-[17rem_1fr]">
@@ -148,7 +166,7 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
             <ul className="mt-3 space-y-1">
               {steps.filter((s) => s.group === g).map((s) => {
                 const i = steps.indexOf(s);
-                const done = i < currentIndex || (finished && s.id !== "done");
+                const done = i < currentIndex;
                 const active = i === currentIndex;
                 return (
                   <li key={s.id} className={`flex items-center gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors ${active ? "bg-paper-deep font-medium text-ink" : done ? "text-ink" : "text-ink-soft/70"}`}>
@@ -214,12 +232,22 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
             <>
               <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">Where do you post{first ? `, ${first}` : ""}?</h1>
               <p className="mt-3 text-ink-soft">Pick every platform you would promote on.</p>
-              <div className="mt-8 flex flex-wrap gap-2.5">
+              <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {platformList.map((p) => {
                   const on = platforms.includes(p.id);
                   return (
-                    <button key={p.id} type="button" aria-pressed={on} onClick={() => setPlatforms(on ? platforms.filter((x) => x !== p.id) : [...platforms, p.id])} className={chip(on)}>
-                      {p.name}
+                    <button
+                      key={p.id}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => setPlatforms(on ? platforms.filter((x) => x !== p.id) : [...platforms, p.id])}
+                      className={`relative flex cursor-pointer flex-col items-start gap-5 rounded-2xl border-2 bg-card p-4 text-left transition-all active:scale-[0.97] ${
+                        on ? "border-ink shadow-sm" : "border-line hover:border-ink/40"
+                      }`}
+                    >
+                      <PlatformIcon id={p.id} size={44} />
+                      <span className="font-display text-lg font-semibold">{p.name}</span>
+                      <span className={`absolute right-3 top-3 flex size-6 items-center justify-center rounded-full text-xs text-white transition-all ${on ? "scale-100 bg-ink" : "scale-0 bg-ink"}`}>✓</span>
                     </button>
                   );
                 })}
@@ -233,9 +261,10 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
               <p className="mt-3 text-ink-soft">Sellers see these when you ask to promote their product. Add at least one.</p>
               <div className="mt-8 space-y-4">
                 {platformList.filter((p) => platforms.includes(p.id)).map((p, i) => (
-                  <label key={p.id} className="block text-sm font-medium">
-                    {p.name}
-                    <input autoFocus={i === 0} value={handles[p.id] ?? ""} onChange={(e) => setHandles({ ...handles, [p.id]: e.target.value })} placeholder="@yourhandle or profile link" maxLength={200} className={input} />
+                  <label key={p.id} className="flex items-center gap-3">
+                    <PlatformIcon id={p.id} size={56} />
+                    <span className="sr-only">{p.name}</span>
+                    <input autoFocus={i === 0} value={handles[p.id] ?? ""} onChange={(e) => setHandles({ ...handles, [p.id]: e.target.value })} placeholder={`${p.name}: @yourhandle or profile link`} maxLength={200} className={`${input} mt-0`} />
                   </label>
                 ))}
               </div>
@@ -264,19 +293,14 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
             </>
           ) : null}
 
-          {current === "account" ? (
+          {current === "email" ? (
             <>
-              <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">Last step{first ? `, ${first}` : ""}. Secure your account.</h1>
-              <p className="mt-3 text-ink-soft">We send one email to confirm it is you.</p>
+              <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">What is your email{first ? `, ${first}` : ""}?</h1>
+              <p className="mt-3 text-ink-soft">We will send a code to check it is really yours.</p>
               <div className="mt-8 space-y-5">
                 <label className="block text-sm font-medium">
                   Email
                   <input autoFocus type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" className={input} />
-                </label>
-                <label className="block text-sm font-medium">
-                  Password
-                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" minLength={8} className={input} />
-                  <span className="mt-1.5 block text-xs font-normal text-ink-soft">At least 8 characters.</span>
                 </label>
                 <label className="flex items-start gap-3 text-sm leading-relaxed text-ink-soft">
                   <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 size-4 accent-[#0f172a]" />
@@ -289,27 +313,47 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
             </>
           ) : null}
 
-          {current === "done" ? (
+          {current === "code" ? (
+            <>
+              <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">Enter the code we sent you.</h1>
+              <p className="mt-3 text-ink-soft">
+                It went to <span className="font-medium text-ink">{email}</span>. Check spam if you cannot see it.
+              </p>
+              <label className="mt-8 block text-sm font-medium">
+                Verification code
+                <input
+                  autoFocus
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                  placeholder="••••••"
+                  className={`${input} text-center font-mono text-3xl tracking-[0.5em]`}
+                />
+              </label>
+              <p className="mt-4 text-sm text-ink-soft">
+                Nothing arrived?{" "}
+                <button type="button" onClick={() => sendCode(false)} disabled={pending} className="cursor-pointer font-medium text-ink underline disabled:opacity-50">Send a new code</button>
+              </p>
+              {notice ? <p className="mt-3 text-sm text-success">{notice}</p> : null}
+            </>
+          ) : null}
+
+          {current === "password" ? (
             <>
               <span className="flex size-14 items-center justify-center rounded-2xl bg-success text-2xl text-white">✓</span>
-              <h1 className="mt-6 text-4xl font-semibold leading-tight sm:text-5xl">Check your inbox{first ? `, ${first}` : ""}.</h1>
-              <p className="mt-3 text-ink-soft">We sent a link to {email}. Open it to verify your email and you will land on your dashboard.</p>
-              <ul className="mt-8 space-y-3 text-sm">
-                {["Account created", role === "seller" ? "Brand saved" : role === "influencer" ? "Channels saved" : "Library ready", "Waiting for you to verify your email"].map((line, i) => (
-                  <li key={line} className="pop flex items-center gap-3" style={{ ["--d" as string]: `${0.3 + i * 0.35}s` }}>
-                    <span className={`flex size-5 items-center justify-center rounded-full text-[11px] text-white ${i < 2 ? "bg-success" : "bg-accent"}`}>{i < 2 ? "✓" : "…"}</span>
-                    {line}
-                  </li>
-                ))}
-              </ul>
-              {role === "seller" ? <p className="mt-6 rounded-2xl bg-paper-deep px-4 py-3 text-sm text-accent-deep">New seller accounts are reviewed by an admin before listings go live. You can create drafts straight away.</p> : null}
-              <Link href="/login" className="mt-8 inline-flex min-h-12 items-center rounded-full bg-ink px-7 text-base font-medium text-white transition-all hover:-translate-y-px active:scale-[0.97]">Go to log in</Link>
+              <h1 className="mt-6 text-4xl font-semibold leading-tight sm:text-5xl">Email verified. Now create a password.</h1>
+              <p className="mt-3 text-ink-soft">You will use it to log in next time. After this you go straight to your own page.</p>
+              {role === "seller" ? <p className="mt-5 rounded-2xl bg-paper-deep px-4 py-3 text-sm text-accent-deep">New seller accounts are reviewed by an admin before listings go live. You can create drafts straight away.</p> : null}
+              <div className="mt-8">
+                <PasswordForm />
+              </div>
             </>
           ) : null}
 
           {error ? <p className="mt-6 rounded-xl border border-alert/30 bg-alert/8 px-4 py-3 text-sm text-alert">{error}</p> : null}
 
-          {current !== "done" ? (
+          {current !== "password" ? (
             <div className="mt-10 flex items-center justify-between gap-4">
               {index > 0 ? (
                 <button type="button" onClick={back} className="cursor-pointer rounded-full px-3 py-2 text-sm text-ink-soft transition-colors hover:bg-paper-deep hover:text-ink">← Back</button>
@@ -325,7 +369,7 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
                   className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full bg-ink px-7 text-base font-medium text-white shadow-sm transition-all hover:-translate-y-px active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-ink/25 disabled:shadow-none"
                 >
                   {pending ? <Spinner /> : null}
-                  {current === "account" ? "Create my account" : "Continue"}
+                  {current === "email" ? "Send me a code" : current === "code" ? "Verify" : "Continue"}
                 </button>
               </span>
             </div>

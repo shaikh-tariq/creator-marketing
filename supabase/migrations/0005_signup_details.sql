@@ -35,7 +35,7 @@ begin
         select new.id, (c ->> 'platform')::public.social_platform, left(c ->> 'url', 300),
                nullif(left(coalesce(meta ->> 'follower_range', ''), 30), '')
         from jsonb_array_elements(meta -> 'channels') c
-        where c ->> 'platform' in ('instagram', 'linkedin', 'pinterest', 'x', 'facebook')
+        where c ->> 'platform' in ('instagram', 'youtube', 'linkedin', 'pinterest', 'x', 'facebook')
           and c ->> 'url' ~* '^https?://'
         on conflict (user_id, platform) do nothing;
       end if;

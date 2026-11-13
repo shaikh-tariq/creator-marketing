@@ -42,6 +42,13 @@ const roleNav: Record<Role, Item[]> = {
   ],
 };
 
+// The three ways in for a visitor, shown side by side so nobody has to guess which button is theirs.
+const joinDoors = [
+  { role: "buyer", label: "Buy", hint: "Find and download products", className: "text-ink hover:bg-paper-deep" },
+  { role: "seller", label: "Sell", hint: "List your digital products", className: "text-ink hover:bg-paper-deep" },
+  { role: "influencer", label: "Promote", hint: "Post about products and earn commission", className: "text-ink hover:bg-paper-deep" },
+];
+
 // A coloured tag so it is always obvious which kind of account is logged in.
 const roleTag: Record<Role, { label: string; className: string }> = {
   buyer: { label: "Buyer", className: "bg-paper-deep text-accent-deep" },
@@ -88,9 +95,15 @@ export function SiteHeader({ profile }: { profile: Profile | null }) {
             </>
           ) : (
             <>
-              <NavLink href="/signup?role=influencer">Join as an influencer</NavLink>
               <NavLink href="/login">Log in</NavLink>
-              <Link href="/signup" className="inline-flex min-h-11 items-center rounded-xl bg-accent px-5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-px hover:bg-accent-deep active:scale-[0.97]">Join for free</Link>
+              <span className="ml-1 text-xs text-ink-soft">Join to</span>
+              <span className="flex items-center gap-1 rounded-2xl border border-line bg-card p-1 shadow-sm">
+                {joinDoors.map((d) => (
+                  <Link key={d.role} href={`/signup?role=${d.role}`} title={d.hint} className={`inline-flex min-h-9 items-center rounded-xl px-4 text-sm font-semibold transition-all active:scale-[0.97] ${d.className}`}>
+                    {d.label}
+                  </Link>
+                ))}
+              </span>
             </>
           )}
         </div>
@@ -104,7 +117,7 @@ export function SiteHeader({ profile }: { profile: Profile | null }) {
           <div className="absolute inset-x-0 top-16 border-b border-line bg-card px-5 pb-6 pt-2 shadow-lg">
             {tag ? <p className="pt-3 text-xs text-ink-soft">Logged in as {first} · {tag.label}</p> : null}
             <nav aria-label="Mobile" className="flex flex-col">
-              {[...nav, ...(profile ? [] : [{ href: "/search", label: "Browse products" }, { href: "/signup?role=influencer", label: "Join as an influencer" }, { href: "/login", label: "Log in" }])].map((l) => (
+              {[...nav, ...(profile ? [] : [{ href: "/signup?role=buyer", label: "Join to buy" }, { href: "/signup?role=seller", label: "Join to sell" }, { href: "/signup?role=influencer", label: "Join to promote" }, { href: "/search", label: "Browse products" }, { href: "/login", label: "Log in" }])].map((l) => (
                 <Link key={l.href} href={l.href} className="border-b border-line py-4 font-display text-xl active:bg-paper-deep">
                   {l.label}
                 </Link>
@@ -115,7 +128,7 @@ export function SiteHeader({ profile }: { profile: Profile | null }) {
                 <SubmitButton className={buttonClass("outline", "w-full")}>Log out</SubmitButton>
               </form>
             ) : (
-              <Link href="/signup" className={buttonClass("primary", "mt-5 w-full")}>Join for free →</Link>
+              null
             )}
           </div>
         </details>

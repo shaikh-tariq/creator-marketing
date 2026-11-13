@@ -47,7 +47,7 @@ export default function SellPage() {
               Sell your work. Let creators bring the <em className="text-accent">buyers.</em>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
-              List once. Influencers across five platforms promote your product for a commission you choose, and
+              List once. Influencers across six platforms promote your product for a commission you choose, and
               only after you approve what they post.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
