@@ -16,6 +16,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <DashLayout
       roleLabel="Admin"
       profile={profile}
+      subtitle="Keep the marketplace safe: approve sellers and listings, handle refunds, watch the ledger."
+      actions={[{ href: "/admin/orders", label: "Orders", primary: true }, { href: "/admin/ledger", label: "Ledger" }]}
       alert={waiting > 0 ? { href: "/admin/review", label: `${waiting} waiting in the review queue` } : null}
     >
       {children}

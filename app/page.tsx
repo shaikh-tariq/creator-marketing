@@ -1,19 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Reveal } from "@/components/client-bits";
+import { PipelineGuide } from "@/components/pipeline-guide";
 import { ProductCard } from "@/components/product-card";
 import { SplitReceipt } from "@/components/split-receipt";
 import { Badge, ButtonLink, Container, Eyebrow, SectionHeading, inputClass, buttonClass } from "@/components/ui";
 import { listProducts } from "@/lib/data";
 import { hubs, launchSettings, platforms } from "@/lib/site";
 
-const loop = [
-  { n: "1", who: "Seller", text: "Lists a product with a price, a commission and a short content brief." },
-  { n: "2", who: "Influencer", text: "Joins the product and creates a post that follows the brief." },
-  { n: "3", who: "Seller", text: "Reviews the post. Nothing goes out under the brand without approval." },
-  { n: "4", who: "Influencer", text: "Gets a personal link and promo code the moment it is approved." },
-  { n: "5", who: "Buyer", text: "Pays through the link or code and downloads the file instantly." },
-  { n: "6", who: "Everyone", text: "The sale is split automatically. Each side sees the same numbers." },
-];
 
 export default async function HomePage() {
   const featured = await listProducts({ limit: 4 });
@@ -119,24 +113,20 @@ export default async function HomePage() {
         </div>
       </Container>
 
+      {/* How it works: the animated guide for sellers, influencers and buyers */}
       <Container className="pt-16 sm:pt-24">
-        <SectionHeading
-          number="02"
-          eyebrow="How it works"
-          title="One loop, three people, no chasing."
-          intro="Sellers do not have to hunt for promoters. Influencers do not need stock or upfront money. Buyers get the file the second they pay."
-        />
-        <ol className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
-          {loop.map((step) => (
-            <li key={step.n} className="bg-card p-7">
-              <div className="flex items-baseline justify-between">
-                <span className="font-display text-4xl text-accent">{step.n}</span>
-                <span className="text-xs font-medium uppercase tracking-[0.16em] text-ink-soft">{step.who}</span>
-              </div>
-              <p className="mt-5 text-base leading-relaxed">{step.text}</p>
-            </li>
-          ))}
-        </ol>
+        <Reveal>
+          <div className="text-center">
+            <Eyebrow>How it works</Eyebrow>
+            <h2 className="mx-auto mt-4 max-w-2xl text-3xl leading-tight sm:text-5xl">One marketplace, three ways in.</h2>
+            <p className="mx-auto mt-4 max-w-xl leading-relaxed text-ink-soft">
+              Choose who you are and watch your side of it, step by step.
+            </p>
+          </div>
+          <div className="mt-10">
+            <PipelineGuide />
+          </div>
+        </Reveal>
       </Container>
 
       {featured.length > 0 ? (

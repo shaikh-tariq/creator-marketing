@@ -15,6 +15,11 @@ export default async function SellerLayout({ children }: { children: React.React
     <DashLayout
       roleLabel="Seller"
       profile={profile}
+      subtitle="Your products, the creators promoting them, and every sale in one place."
+      actions={[
+        { href: "/seller/products/new", label: "Add a product", primary: true },
+        { href: "/seller/earnings", label: "See orders" },
+      ]}
       alert={waiting > 0 ? { href: "/seller/submissions", label: `${waiting} waiting for your review` } : null}
     >
       {children}

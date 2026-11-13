@@ -163,9 +163,19 @@ export async function submitContent(fd: FormData) {
     p_url: str(fd, "content_url"),
     p_caption: str(fd, "caption"),
     p_disclosure: fd.get("disclosure") === "on",
+    p_image: str(fd, "image_path") || null,
   });
   if (error) back("/influencer/joins", "error", error.message);
   back("/influencer/joins", "ok", "Post submitted. The seller will review it.");
+}
+
+export async function setImpressions(fd: FormData) {
+  const { supabase } = await ctx();
+  const n = Number(str(fd, "impressions"));
+  if (!Number.isInteger(n) || n < 0) back("/influencer/joins", "error", "Enter impressions as a whole number");
+  const { error } = await supabase.rpc("set_post_impressions", { p_submission: str(fd, "submission_id"), p_impressions: n });
+  if (error) back("/influencer/joins", "error", error.message);
+  back("/influencer/joins", "ok", "Impressions updated");
 }
 
 export async function saveChannel(fd: FormData) {

@@ -19,7 +19,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="flex min-h-full flex-col">
         <SiteHeader profile={profile} />
         <main className="flex-1">{children}</main>
-        <SiteFooter />
+        <SiteFooter profile={profile} />
       </body>
     </html>
   );

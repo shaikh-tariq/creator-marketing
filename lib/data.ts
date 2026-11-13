@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { supabaseConfigured } from "./supabase/config";
+import { supabaseConfigured, supabaseUrl } from "./supabase/config";
 import { createClient } from "./supabase/server";
 import type { LedgerEntry, Product } from "./types";
 
@@ -55,4 +55,9 @@ export async function siteOrigin(): Promise<string> {
 
 export function shortDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" });
+}
+
+// Public address of a post screenshot an influencer uploaded.
+export function postImageUrl(path: string | null) {
+  return path ? `${supabaseUrl}/storage/v1/object/public/post-images/${path}` : null;
 }

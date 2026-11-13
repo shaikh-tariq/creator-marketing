@@ -79,7 +79,7 @@ export function SiteHeader({ profile }: { profile: Profile | null }) {
         <div className="hidden shrink-0 items-center gap-1.5 whitespace-nowrap text-sm lg:flex">
           {profile ? (
             <>
-              {profile.role !== "buyer" ? <NavLink href="/library">My library</NavLink> : null}
+              {profile.role === "admin" ? <NavLink href="/library">My library</NavLink> : null}
               <span className="flex max-w-36 items-center gap-2 rounded-full border border-line bg-card py-1 pl-1 pr-3 shadow-sm">
                 <span className="flex size-7 items-center justify-center rounded-full bg-paper-deep text-xs font-semibold text-accent-deep">{initial}</span>
                 <span className="truncate">{first}</span>
@@ -105,7 +105,7 @@ export function SiteHeader({ profile }: { profile: Profile | null }) {
           <div className="absolute inset-x-0 top-16 border-b border-line bg-card px-5 pb-6 pt-2 shadow-lg">
             {tag ? <p className="pt-3 text-xs text-ink-soft">Logged in as {first} · {tag.label}</p> : null}
             <nav aria-label="Mobile" className="flex flex-col">
-              {[...nav, ...(profile ? (profile.role !== "buyer" ? [{ href: "/library", label: "My library" }] : []) : [{ href: "/login", label: "Log in" }])].map((l) => (
+              {[...nav, ...(profile ? [] : [{ href: "/login", label: "Log in" }])].map((l) => (
                 <Link key={l.href} href={l.href} className="border-b border-line py-4 font-display text-xl active:bg-paper-deep">
                   {l.label}
                 </Link>

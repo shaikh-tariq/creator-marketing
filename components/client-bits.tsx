@@ -2,7 +2,7 @@
 
 import Link, { useLinkStatus } from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 
@@ -138,5 +138,75 @@ export function CopyText({ text, label }: { text: string; label?: string }) {
       <span className="truncate font-mono">{label ?? text}</span>
       <span className="shrink-0 text-ink-soft">{copied ? "Copied" : "Copy"}</span>
     </button>
+  );
+}
+
+// Lets an influencer attach a screenshot of their post. Uploads straight to storage and shows a preview.
+export function PostImagePicker({ userId }: { userId: string }) {
+  const [path, setPath] = useState("");
+  const [preview, setPreview] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  async function onChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError("");
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) return setError("Use a PNG, JPG or WebP image.");
+    if (file.size > 5 * 1024 * 1024) return setError("The image is over 5 MB.");
+    setBusy(true);
+    const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+    const target = `${userId}/${Date.now()}.${ext}`;
+    const { error: uploadError } = await createClient().storage.from("post-images").upload(target, file);
+    setBusy(false);
+    if (uploadError) return setError(uploadError.message);
+    setPath(target);
+    setPreview(URL.createObjectURL(file));
+  }
+
+  return (
+    <div>
+      <input type="hidden" name="image_path" value={path} />
+      <label className="flex cursor-pointer items-center gap-4 rounded-xl border border-dashed border-ink/30 bg-paper p-3 text-sm transition-colors hover:border-ink">
+        {preview ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={preview} alt="Your post preview" className="size-20 rounded-lg object-cover" />
+        ) : (
+          <span className="flex size-20 items-center justify-center rounded-lg bg-paper-deep text-2xl text-accent">＋</span>
+        )}
+        <span>
+          <span className="block font-medium">{busy ? "Uploading…" : preview ? "Change screenshot" : "Add a screenshot of your post"}</span>
+          <span className="mt-1 block text-xs text-ink-soft">Shown to the seller and on your dashboard. PNG or JPG, up to 5 MB.</span>
+        </span>
+        <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={onChange} disabled={busy} />
+      </label>
+      {error ? <p className="mt-2 text-sm text-alert">{error}</p> : null}
+    </div>
+  );
+}
+
+// Fades a section in the first time it scrolls into view.
+export function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShown(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.12 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <div ref={ref} className={`reveal ${shown ? "reveal-in" : ""} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
+      {children}
+    </div>
   );
 }

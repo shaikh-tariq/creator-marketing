@@ -3,7 +3,7 @@ import { reviewSubmission, setJoin } from "@/app/actions";
 import { SubmitButton } from "@/components/client-bits";
 import { Card, Empty, Flash, PageTitle, StatusBadge, Table, inputClass, smallButton } from "@/components/ui";
 import { requireRole } from "@/lib/auth";
-import { nameMap, shortDate } from "@/lib/data";
+import { nameMap, postImageUrl, shortDate } from "@/lib/data";
 import { platforms } from "@/lib/site";
 import { createClient } from "@/lib/supabase/server";
 
@@ -18,7 +18,7 @@ export default async function SellerSubmissions({ searchParams }: { searchParams
 
   const [joinsRes, subsRes, linksRes] = await Promise.all([
     supabase.from("joins").select("id, influencer_id, status, pitch, created_at, products(title)").eq("seller_id", profile.id).order("created_at", { ascending: false }),
-    supabase.from("submissions").select("id, influencer_id, platform, content_url, caption, status, seller_note, created_at, products(title)").eq("seller_id", profile.id).order("created_at", { ascending: false }),
+    supabase.from("submissions").select("id, influencer_id, platform, content_url, caption, status, seller_note, image_path, created_at, products(title)").eq("seller_id", profile.id).order("created_at", { ascending: false }),
     supabase.from("tracking_links").select("join_id, promo_code, clicks, active").eq("seller_id", profile.id),
   ]);
   const joins = joinsRes.data ?? [];
@@ -51,7 +51,13 @@ export default async function SellerSubmissions({ searchParams }: { searchParams
                 </div>
                 <a href={s.content_url} target="_blank" rel="noopener noreferrer nofollow" className={smallButton("outline")}>Open the post ↗</a>
               </div>
-              {s.caption ? <p className="mt-4 whitespace-pre-line rounded-xl bg-paper p-4 text-sm leading-relaxed">{s.caption}</p> : null}
+              <div className="mt-4 flex flex-col gap-4 sm:flex-row">
+                {postImageUrl(s.image_path) ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={postImageUrl(s.image_path)!} alt="Screenshot of the post" className="w-full max-w-48 rounded-xl border border-line object-cover" />
+                ) : null}
+                {s.caption ? <p className="flex-1 whitespace-pre-line rounded-xl bg-paper p-4 text-sm leading-relaxed">{s.caption}</p> : null}
+              </div>
               <form action={reviewSubmission} className="mt-4">
                 <input type="hidden" name="submission_id" value={s.id} />
                 <input name="note" maxLength={500} placeholder="Note to the influencer (needed if you ask for changes)" className={`${inputClass} mt-0`} />
