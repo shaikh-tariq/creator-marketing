@@ -1,18 +1,35 @@
 import { NextResponse, type NextRequest } from "next/server";
+import type { EmailOtpType } from "@supabase/supabase-js";
 import { supabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
-// The link in the verification email lands here. We swap its code for a login session.
-export async function GET(request: NextRequest) {
-  const code = request.nextUrl.searchParams.get("code");
+// Only the sign-up and log-in email types are accepted here.
+const allowedTypes: EmailOtpType[] = ["email", "signup", "magiclink"];
 
-  if (supabaseConfigured && code) {
+function safeNext(value: string | null) {
+  const next = value ?? "";
+  return next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+}
+
+// The link in the verification email lands here. We swap it for a login session.
+// Two link styles are supported:
+//   ?token_hash=...&type=email   (the email template links straight to this site; recommended)
+//   ?code=...                    (the older link that goes through Supabase first)
+export async function GET(request: NextRequest) {
+  const params = request.nextUrl.searchParams;
+  const tokenHash = params.get("token_hash");
+  const type = params.get("type") as EmailOtpType | null;
+  const code = params.get("code");
+
+  if (supabaseConfigured) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      const next = request.nextUrl.searchParams.get("next") ?? "";
-      const target = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
-      return NextResponse.redirect(new URL(target, request.url));
+
+    if (tokenHash && type && allowedTypes.includes(type)) {
+      const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+      if (!error) return NextResponse.redirect(new URL(safeNext(params.get("next")), request.url));
+    } else if (code) {
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      if (!error) return NextResponse.redirect(new URL(safeNext(params.get("next")), request.url));
     }
   }
 
