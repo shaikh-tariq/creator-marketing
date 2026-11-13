@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HeroCrowd } from "@/components/hero-crowd";
+import Image from "next/image";
 import { ProductCard } from "@/components/product-card";
 import { SplitReceipt } from "@/components/split-receipt";
 import { Badge, ButtonLink, Container, Eyebrow, SectionHeading, inputClass, buttonClass } from "@/components/ui";
@@ -43,15 +43,23 @@ export default async function HomePage() {
           </div>
         </Container>
 
-        <div className="rise relative mx-auto mt-6 max-w-6xl" style={{ ["--d" as string]: "0.3s" }}>
+        <div className="rise relative mx-auto mt-10 max-w-6xl" style={{ ["--d" as string]: "0.3s" }}>
           {/* Floating examples of what each side sees */}
           <div aria-hidden className="pointer-events-none absolute inset-0 hidden md:block">
-            <span className="float absolute left-[4%] top-[6%] rounded-2xl border border-line bg-card px-4 py-2.5 text-sm font-medium shadow-lg">✓ Post approved</span>
-            <span className="float absolute left-[30%] top-[0%] rounded-2xl bg-ink px-4 py-2.5 font-mono text-sm text-white shadow-lg" style={{ ["--d" as string]: "1.2s" }}>AMAN10</span>
-            <span className="float absolute right-[27%] top-[2%] rounded-2xl border border-line bg-card px-4 py-2.5 text-sm font-medium text-success shadow-lg" style={{ ["--d" as string]: "0.6s" }}>+ ₹180 commission</span>
-            <span className="float absolute right-[3%] top-[10%] rounded-2xl bg-accent px-4 py-2.5 text-sm font-medium text-white shadow-lg" style={{ ["--d" as string]: "1.8s" }}>New sale · ₹900</span>
+            <span className="float absolute left-[1%] top-[-4%] rounded-2xl border border-line bg-card px-4 py-2.5 text-sm font-medium shadow-lg">✓ Post approved</span>
+            <span className="float absolute left-[19%] top-[-8%] rounded-2xl bg-ink px-4 py-2.5 font-mono text-sm text-white shadow-lg" style={{ ["--d" as string]: "1.2s" }}>AMAN10</span>
+            <span className="float absolute right-[17%] top-[-9%] rounded-2xl border border-line bg-card px-4 py-2.5 text-sm font-medium text-success shadow-lg" style={{ ["--d" as string]: "0.6s" }}>+ ₹180 commission</span>
+            <span className="float absolute right-[1%] top-[-5%] rounded-2xl bg-accent px-4 py-2.5 text-sm font-medium text-white shadow-lg" style={{ ["--d" as string]: "1.8s" }}>New sale · ₹900</span>
           </div>
-          <HeroCrowd />
+          <Image
+            src="/hero-crowd.webp"
+            alt="A cheerful group of creators posing together for a selfie"
+            width={1376}
+            height={768}
+            priority
+            sizes="(max-width: 1152px) 100vw, 1152px"
+            className="block h-auto w-full"
+          />
         </div>
       </section>
 
