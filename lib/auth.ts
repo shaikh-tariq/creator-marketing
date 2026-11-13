@@ -16,7 +16,7 @@ export type Profile = {
 export const roleHome: Record<Role, string> = {
   seller: "/seller",
   influencer: "/influencer",
-  buyer: "/library",
+  buyer: "/search", // buyers land on the product browse page
   admin: "/admin",
 };
 

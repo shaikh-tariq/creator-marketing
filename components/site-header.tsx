@@ -23,14 +23,14 @@ const roleNav: Record<Role, Item[]> = {
   seller: [
     { href: "/seller", label: "Overview", exact: true },
     { href: "/seller/products", label: "Products" },
-    { href: "/seller/submissions", label: "Influencers & posts" },
-    { href: "/seller/earnings", label: "Orders & earnings" },
+    { href: "/seller/submissions", label: "Influencers" },
+    { href: "/seller/earnings", label: "Earnings" },
     { href: "/search", label: "Marketplace" },
   ],
   influencer: [
     { href: "/influencer", label: "Overview", exact: true },
     { href: "/influencer/browse", label: "Find products" },
-    { href: "/influencer/joins", label: "My joins & posts" },
+    { href: "/influencer/joins", label: "My posts" },
     { href: "/influencer/earnings", label: "Earnings" },
   ],
   admin: [
@@ -59,31 +59,31 @@ export function SiteHeader({ profile }: { profile: Profile | null }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-card/85 backdrop-blur-md">
-      <Container className="flex h-16 items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Link href={profile ? roleHome[profile.role] : "/"} className="font-display text-xl font-semibold tracking-tight transition-opacity hover:opacity-80">
+      <Container className={`flex h-16 items-center justify-between gap-4 ${profile ? "max-w-7xl" : ""}`}>
+        <div className="flex shrink-0 items-center gap-3">
+          <Link href={profile ? roleHome[profile.role] : "/"} className="shrink-0 whitespace-nowrap font-display text-xl font-semibold tracking-tight transition-opacity hover:opacity-80">
             Creator <span className="text-accent">Marketing</span>
             <span className="sr-only"> {site.tagline}</span>
           </Link>
-          {tag ? <span className={`hidden rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider sm:inline ${tag.className}`}>{tag.label}</span> : null}
+          {tag ? <span className={`hidden shrink-0 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider sm:inline ${tag.className}`}>{tag.label}</span> : null}
         </div>
 
-        <nav aria-label="Main" className="hidden items-center gap-1 text-sm lg:flex">
+        <nav aria-label="Main" className="hidden min-w-0 items-center gap-0.5 text-sm lg:flex">
           {nav.map((l) => (
             <NavLink key={l.href} href={l.href} exact={l.exact}>{l.label}</NavLink>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 text-sm lg:flex">
+        <div className="hidden shrink-0 items-center gap-1.5 whitespace-nowrap text-sm lg:flex">
           {profile ? (
             <>
               {profile.role !== "buyer" ? <NavLink href="/library">My library</NavLink> : null}
-              <span className="flex items-center gap-2 rounded-full border border-line bg-card py-1 pl-1 pr-3 shadow-sm">
+              <span className="flex max-w-36 items-center gap-2 rounded-full border border-line bg-card py-1 pl-1 pr-3 shadow-sm">
                 <span className="flex size-7 items-center justify-center rounded-full bg-paper-deep text-xs font-semibold text-accent-deep">{initial}</span>
-                {first}
+                <span className="truncate">{first}</span>
               </span>
               <form action={signOut}>
-                <SubmitButton className="inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-ink-soft transition-all hover:bg-paper-deep hover:text-ink active:scale-[0.97]">Log out</SubmitButton>
+                <SubmitButton className="inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-ink-soft transition-all hover:bg-paper-deep hover:text-ink active:scale-[0.97]">Log out</SubmitButton>
               </form>
             </>
           ) : (
