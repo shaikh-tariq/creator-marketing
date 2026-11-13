@@ -43,7 +43,7 @@ export default async function HomePage() {
           </div>
         </Container>
 
-        <div className="rise relative mx-auto mt-10 max-w-6xl" style={{ ["--d" as string]: "0.3s" }}>
+        <div className="rise relative mx-auto mt-12 max-w-7xl px-2" style={{ ["--d" as string]: "0.3s" }}>
           {/* Floating examples of what each side sees */}
           <div aria-hidden className="pointer-events-none absolute inset-0 hidden md:block">
             <span className="float absolute left-[1%] top-[-4%] rounded-2xl border border-line bg-card px-4 py-2.5 text-sm font-medium shadow-lg">✓ Post approved</span>
@@ -54,10 +54,10 @@ export default async function HomePage() {
           <Image
             src="/hero-crowd.webp"
             alt="A cheerful group of creators posing together for a selfie"
-            width={1376}
-            height={768}
+            width={2000}
+            height={848}
             priority
-            sizes="(max-width: 1152px) 100vw, 1152px"
+            sizes="(max-width: 1280px) 100vw, 1280px"
             className="block h-auto w-full"
           />
         </div>
