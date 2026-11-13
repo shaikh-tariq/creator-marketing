@@ -76,7 +76,7 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
       list.push({ id: "audience", group: "Your channels", label: "Audience" });
     }
     list.push({ id: "email", group: "Finish", label: "Your email" });
-    list.push({ id: "code", group: "Finish", label: "Verify the code" });
+    list.push({ id: "code", group: "Finish", label: "Verify your email" });
     list.push({ id: "password", group: "Finish", label: "Create a password" });
     return list;
   }, [role]);
@@ -128,7 +128,7 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
       const result = await sendSignupCode({}, fd);
       if (result.error) return setError(result.error);
       if (advance) setIndex((i) => i + 1);
-      else setNotice("A new code is on its way.");
+      else setNotice("A new email is on its way.");
     });
   }
 
@@ -296,7 +296,7 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
           {current === "email" ? (
             <>
               <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">What is your email{first ? `, ${first}` : ""}?</h1>
-              <p className="mt-3 text-ink-soft">We will send a code to check it is really yours.</p>
+              <p className="mt-3 text-ink-soft">We will send you an email to check it is really yours.</p>
               <div className="mt-8 space-y-5">
                 <label className="block text-sm font-medium">
                   Email
@@ -315,12 +315,22 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
 
           {current === "code" ? (
             <>
-              <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">Enter the code we sent you.</h1>
+              <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">Check your email.</h1>
               <p className="mt-3 text-ink-soft">
-                It went to <span className="font-medium text-ink">{email}</span>. Check spam if you cannot see it.
+                We sent a message to <span className="font-medium text-ink">{email}</span>. Check spam if you cannot see it.
               </p>
-              <label className="mt-8 block text-sm font-medium">
-                Verification code
+              <ol className="mt-6 space-y-3 text-sm">
+                <li className="flex gap-3 rounded-2xl border border-line bg-card p-4">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-white">1</span>
+                  <span><span className="font-medium">Click the confirmation link in the email.</span> It opens the next step, where you create your password.</span>
+                </li>
+                <li className="flex gap-3 rounded-2xl border border-line bg-card p-4">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-paper-deep text-xs font-semibold text-accent-deep">2</span>
+                  <span>Or, if the email shows a code, type it below and stay on this page.</span>
+                </li>
+              </ol>
+              <label className="mt-6 block text-sm font-medium">
+                Verification code (if your email has one)
                 <input
                   autoFocus
                   inputMode="numeric"
@@ -333,7 +343,7 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
               </label>
               <p className="mt-4 text-sm text-ink-soft">
                 Nothing arrived?{" "}
-                <button type="button" onClick={() => sendCode(false)} disabled={pending} className="cursor-pointer font-medium text-ink underline disabled:opacity-50">Send a new code</button>
+                <button type="button" onClick={() => sendCode(false)} disabled={pending} className="cursor-pointer font-medium text-ink underline disabled:opacity-50">Send it again</button>
               </p>
               {notice ? <p className="mt-3 text-sm text-success">{notice}</p> : null}
             </>
@@ -369,7 +379,7 @@ export function SignupWizard({ defaultRole }: { defaultRole?: string }) {
                   className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full bg-ink px-7 text-base font-medium text-white shadow-sm transition-all hover:-translate-y-px active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-ink/25 disabled:shadow-none"
                 >
                   {pending ? <Spinner /> : null}
-                  {current === "email" ? "Send me a code" : current === "code" ? "Verify" : "Continue"}
+                  {current === "email" ? "Send verification email" : current === "code" ? "Verify" : "Continue"}
                 </button>
               </span>
             </div>
