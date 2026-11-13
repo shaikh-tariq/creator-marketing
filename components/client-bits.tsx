@@ -68,33 +68,6 @@ export function SubmitButton({
   );
 }
 
-// Dashboard menu with the current page highlighted.
-export function DashNav({ items }: { items: { href: string; label: string; count?: number }[] }) {
-  const pathname = usePathname();
-  const root = items[0]?.href ?? "";
-  return (
-    <nav aria-label="Dashboard" className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 lg:mx-0 lg:flex-col lg:gap-1 lg:px-0">
-      {items.map((item) => {
-        const active = item.href === root ? pathname === root : pathname.startsWith(item.href);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`flex shrink-0 items-center justify-between gap-3 rounded-full px-4 py-2 text-sm transition-all active:scale-[0.97] lg:rounded-xl ${
-              active ? "bg-ink text-white shadow-sm" : "text-ink-soft hover:bg-paper-deep hover:text-ink"
-            }`}
-          >
-            <span className="flex items-center gap-1">{item.label}<LinkPending /></span>
-            {item.count ? (
-              <span className={`rounded-full px-2 text-xs ${active ? "bg-paper/20" : "bg-accent text-paper"}`}>{item.count}</span>
-            ) : null}
-          </Link>
-        );
-      })}
-    </nav>
-  );
-}
-
 const blocked = /\.(exe|bat|cmd|com|msi|scr|js|vbs|ps1|sh|jar|apk|dll)$/i;
 const maxBytes = 50 * 1024 * 1024;
 

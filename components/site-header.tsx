@@ -25,6 +25,7 @@ const roleNav: Record<Role, Item[]> = {
     { href: "/seller/products", label: "Products" },
     { href: "/seller/submissions", label: "Influencers" },
     { href: "/seller/earnings", label: "Earnings" },
+    { href: "/seller/profile", label: "Brand profile" },
     { href: "/search", label: "Marketplace" },
   ],
   influencer: [
@@ -32,6 +33,7 @@ const roleNav: Record<Role, Item[]> = {
     { href: "/influencer/browse", label: "Find products" },
     { href: "/influencer/joins", label: "My posts" },
     { href: "/influencer/earnings", label: "Earnings" },
+    { href: "/influencer/channels", label: "Profile & channels" },
   ],
   admin: [
     { href: "/admin", label: "Overview", exact: true },

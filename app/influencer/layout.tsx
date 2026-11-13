@@ -7,13 +7,6 @@ export default async function InfluencerLayout({ children }: { children: React.R
     <DashLayout
       roleLabel="Influencer"
       profile={profile}
-      nav={[
-        { href: "/influencer", label: "Overview" },
-        { href: "/influencer/browse", label: "Find products" },
-        { href: "/influencer/joins", label: "My joins & posts" },
-        { href: "/influencer/earnings", label: "Earnings" },
-        { href: "/influencer/channels", label: "Profile & channels" },
-      ]}
     >
       {children}
     </DashLayout>

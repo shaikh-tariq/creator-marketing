@@ -10,18 +10,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     supabase.from("products").select("id", { count: "exact", head: true }).eq("status", "pending_review"),
   ]);
 
+  const waiting = (sellers.count ?? 0) + (products.count ?? 0);
+
   return (
     <DashLayout
       roleLabel="Admin"
       profile={profile}
-      nav={[
-        { href: "/admin", label: "Overview" },
-        { href: "/admin/review", label: "Review queue", count: (sellers.count ?? 0) + (products.count ?? 0) },
-        { href: "/admin/users", label: "Users" },
-        { href: "/admin/orders", label: "Orders & refunds" },
-        { href: "/admin/ledger", label: "Ledger" },
-        { href: "/admin/settings", label: "Settings" },
-      ]}
+      alert={waiting > 0 ? { href: "/admin/review", label: `${waiting} waiting in the review queue` } : null}
     >
       {children}
     </DashLayout>
